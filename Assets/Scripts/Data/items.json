@@ -1,0 +1,35 @@
+{
+  "HpPotion": {
+    "ItemType": "HpPotion",
+    "Name": "체력 포션",
+    "Description": "사용 시 체력을 회복합니다.",
+    "Effect": 50
+  },
+  "AttackPotion": {
+    "ItemType": "AttackPotion",
+    "Name": "공격력 증가 포션",
+    "Description": "사용 시 일정 시간 동안 공격력이 증가합니다.",
+    "Effect": 10,
+    "Duration": 3
+  },
+  "ShieldPotion": {
+    "ItemType": "ShieldPotion",
+    "Name": "방어력 증가 포션",
+    "Description": "사용 시 일정 시간 동안 방어력이 증가합니다.",
+    "Effect": 5,
+    "Duration": 5
+  },
+  "RandomPotion": {
+    "ItemType": "RandomPotion",
+    "Name": "랜덤 포션",
+    "Description": "랜덤으로 긍정적 또는 부정적 효과를 발생시킴.",
+    "PositiveEffects": [
+      "HpFullRecovery",
+      "DoubleAttackPower"
+    ],
+    "NegativeEffects": [
+      "HalfHp",
+      "DoubleDamageTaken"
+    ]
+  }
+}
