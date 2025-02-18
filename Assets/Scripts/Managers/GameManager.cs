@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour
         //ItemManager.Instance.LoadItemsFromJson();
         ItemManager.Instance.OnUsedItem += BroadcastUseItemLog;
 
-        Player.PrintPropertyValueByReflection(Player);
+        //Player.PrintPropertyValueByReflection(Player);
     }
 
     private void Awake()
@@ -94,7 +94,7 @@ public class GameManager : MonoBehaviour
     public void PrintPlayerInfo()
     {
         Debug.Log("캐릭터 상태창입니다.");
-        Player.PrintInfo();
+        //Player.PrintInfo();
         ItemManager.Instance.PrintInventory();
     }
 

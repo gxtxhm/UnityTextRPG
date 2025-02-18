@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
+using UnityEngine;
 
 public interface IUseableItem
 {
@@ -105,7 +105,6 @@ public class RandomPotion : Item, IUseableItem
 {
     private List<string> PositiveEffects;
     private List<string> NegativeEffects;
-    private Random random = new Random();
 
     public RandomPotion()
     {
@@ -119,10 +118,10 @@ public class RandomPotion : Item, IUseableItem
 
     public void Use(Player player)
     {
-        bool isPositive = random.Next(0, 2) == 0; // ✅ 50% 확률로 긍정 or 부정 효과 선택
+        bool isPositive = UnityEngine.Random.Range(0, 2) == 0; // ✅ 50% 확률로 긍정 or 부정 효과 선택
         string selectedEffect = isPositive
-            ? PositiveEffects[random.Next(PositiveEffects.Count)]
-            : NegativeEffects[random.Next(NegativeEffects.Count)];
+            ? PositiveEffects[UnityEngine.Random.Range(0,PositiveEffects.Count)]
+            : NegativeEffects[UnityEngine.Random.Range(0, NegativeEffects.Count)];
 
         ApplyEffect(player, selectedEffect);
     }

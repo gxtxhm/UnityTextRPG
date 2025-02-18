@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.IO;
 using Newtonsoft.Json;
-
+using UnityEngine;
 
 public enum ItemType
 {
@@ -45,7 +45,7 @@ public class ItemManager
         itemMap.Add(ItemType.RandomPotion, typeof(RandomPotion));
     }
 
-    public void Update()
+    public void UpdateItemManager()
     {
         if (DurationItems == null)
         {
@@ -177,9 +177,9 @@ public class ItemManager
         
     public Item RandomCreateItem()
     {
-        Random random = new Random();
+        //Random random = new Random();
 
-        ItemType randomType = (ItemType)random.Next(Enum.GetValues(typeof(ItemType)).Length);
+        ItemType randomType = (ItemType)UnityEngine.Random.Range(0,Enum.GetValues(typeof(ItemType)).Length);
         Item item = (Item)Activator.CreateInstance(itemMap[randomType])!;
 
         AddItem(item);
