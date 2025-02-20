@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum ResultBattle
 {
@@ -19,17 +21,21 @@ public class GameManager : MonoBehaviour
 
     public static int MonsterCount { get; } = 3;
 
-    public Player Player { get; private set; }
-    public  List<Monster> monsters;
+    private GameObject PlayerObj;
+    public Player Player;
+    public List<Monster> monsters;
 
     Boss _boss;
     public Boss Boss { get { return _boss; } }
 
     public void Init()
     {
-        Player = new Player();
+        //Player = new Player();
+        GameObject playerPrefab = Resources.Load<GameObject>("Prefabs/Player");
+        PlayerObj = Instantiate(playerPrefab);
+        Player = PlayerObj.GetComponent<Player>();
         monsters = new List<Monster>();
-        for(int i = 0; i < MonsterCount; i++) 
+        for (int i = 0; i < MonsterCount; i++)
         {
             monsters.Add(new Monster());
             monsters[i].OnDeadEvent += BroadcastMonsterDead;
@@ -38,6 +44,7 @@ public class GameManager : MonoBehaviour
         _boss = new Boss();
         _boss.OnDeadEvent += BroadcastMonsterDead;
         // 이벤트 등록
+
         Player.OnDeadEvent += GameOver;
         Player.OnAttackEvent += BroadcastPlayerAttack;
 
@@ -52,24 +59,27 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
             Init();
+            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(Player);
+            DontDestroyOnLoad(PlayerObj);
+            
         }
         else
         {
             Destroy(gameObject);
         }
-        
+
     }
 
     public List<Monster> FindHalfHpMonster()
     {
-        return monsters?.Where(n => n.Hp < n.MaxHp / 2).ToList()?? new List<Monster>();
+        return monsters?.Where(n => n.Hp < n.MaxHp / 2).ToList() ?? new List<Monster>();
     }
 
     public void ResetMonter()
     {
-        foreach(Monster monster in monsters)
+        foreach (Monster monster in monsters)
         {
             monster.Hp = 30 * monster.Id;
         }
@@ -91,25 +101,25 @@ public class GameManager : MonoBehaviour
         Player.Name = Console.ReadLine();
     }
 
-    public void PrintPlayerInfo()
+    public void PrintPlayerInfo()   
     {
         Debug.Log("캐릭터 상태창입니다.");
         //Player.PrintInfo();
         ItemManager.Instance.PrintInventory();
     }
 
-    public void ExitGame()
-    {
-        Debug.Log("게임을 종료합니다.");
-        Environment.Exit(0);
-    }
+    //public void ExitGame()
+    //{
+    //    Debug.Log("게임을 종료합니다.");
+    //    Environment.Exit(0);
+    //}
 
-    public void PrintMainMenu()
-    {
-        Debug.Log(UtilTextManager.MainMenuChoice);
-    }
+    //public void PrintMainMenu()
+    //{
+    //    Debug.Log(UtilTextManager.MainMenuChoice);
+    //}
 
-        
+
 
     public void MoveTown()
     {
@@ -120,14 +130,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log(UtilTextManager.EnterDungeon);
 
-        int choice = int.Parse(Console.ReadLine());
-
-        if (choice == 2)// 입구에서 마을로 되돌아가기
-        {
-            Debug.Log(UtilTextManager.ExitDungeonEntrance);
-            return;
-        }
-        PlayDungeon(Player);
+        //PlayDungeon(Player);
     }
 
     void PlayDungeon(Player player)
@@ -168,7 +171,7 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                
+
                 // 0~99 범위의 난수 생성
                 int randomValue = UnityEngine.Random.Range(0, 100);
 
@@ -227,5 +230,44 @@ public class GameManager : MonoBehaviour
     void BroadcastUseItemLog(string s)
     {
         Debug.Log(s);
+    }
+
+    // UI 버튼관련
+    public void OnStartButton()
+    {
+        Debug.Log("StartBtn");
+        StartCoroutine(LoadMainScene());
+    }
+    
+    IEnumerator LoadMainScene()
+    {
+        AsyncOperation operation = SceneManager.LoadSceneAsync("MainScene");
+        
+        while (!operation.isDone)
+        {
+            yield return null;
+        }
+        UIManager.Instance.SetMainSceneUI();
+    }
+
+    public void OnEndButton()
+    {
+        Debug.Log("EndBtn");
+        Application.Quit();
+    }
+
+    public void OnMainMenuButton()
+    {
+        StartCoroutine(LoadStartScene());
+    }
+
+    IEnumerator LoadStartScene()
+    {
+        AsyncOperation operation = SceneManager.LoadSceneAsync("StartScene");
+        while(!operation.isDone)
+        {
+            yield return null;
+        }
+        UIManager.Instance.SetStartSceneUI();
     }
 }

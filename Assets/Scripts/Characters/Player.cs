@@ -8,6 +8,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using TMPro;
 
 public class Player : MonoBehaviour, IGameCharacter
 {
@@ -50,8 +51,8 @@ public class Player : MonoBehaviour, IGameCharacter
     // 높을수록 데미지 더 받음. 
     public float DefenseRate { get; set; } = 1;
 
-    public Text hpText;
-    public Text expText;
+    public TextMeshProUGUI hpText;
+    public TextMeshProUGUI expText;
 
 
     public Player() {  }
