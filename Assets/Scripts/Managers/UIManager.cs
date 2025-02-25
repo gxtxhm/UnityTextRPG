@@ -15,6 +15,12 @@ public class UIManager
     public GameObject EnterDungeonBtn;
     public GameObject MainMenuBtn;
 
+
+    // BattleScene ฐüทร
+    public GameObject optionBtn1;
+    public GameObject optionBtn2;
+    public GameObject optionBtn3;
+
     public void SetStartSceneUI()
     {
         startBtn = GameObject.Find("StartBtn");
@@ -27,6 +33,7 @@ public class UIManager
 
         startBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.OnStartButton);
         endBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.OnEndButton);
+
     }
 
     public void SetMainSceneUI()
@@ -46,5 +53,13 @@ public class UIManager
         MainMenuBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.OnMainMenuButton);
     }
 
+    public void SetBattleSceneUI()
+    {
+        GameObject buttonsPanel = GameObject.Find("ButtonsPanel");
+        if (buttonsPanel == null) return;
+        optionBtn1 = buttonsPanel.transform.Find("Option1").gameObject;
+        optionBtn2 = buttonsPanel.transform.Find("Option2").gameObject;
+        optionBtn3 = buttonsPanel.transform.Find("Option3").gameObject;
+    }
 
 }
