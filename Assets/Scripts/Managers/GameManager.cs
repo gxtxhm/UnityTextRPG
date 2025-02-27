@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 public enum ResultBattle
@@ -18,6 +19,8 @@ public enum ResultBattle
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
+
+    
 
     public static int MonsterCount { get; } = 3;
 
@@ -52,6 +55,8 @@ public class GameManager : MonoBehaviour
         ItemManager.Instance.OnUsedItem += BroadcastUseItemLog;
 
         //Player.PrintPropertyValueByReflection(Player);
+
+        
     }
 
     private void Awake()
@@ -63,13 +68,11 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             DontDestroyOnLoad(Player);
             DontDestroyOnLoad(PlayerObj);
-            
         }
         else
         {
             Destroy(gameObject);
         }
-
     }
 
     public List<Monster> FindHalfHpMonster()
@@ -97,10 +100,11 @@ public class GameManager : MonoBehaviour
         Player.Name = Console.ReadLine();
     }
 
-    public void PrintPlayerInfo()   
+    public void PrintPlayerInfo()
     {
         Debug.Log("캐릭터 상태창입니다.");
         //Player.PrintInfo();
+        GameObject item = UIManager.Instance.CreatePlayerInfoPanel();
         ItemManager.Instance.PrintInventory();
     }
 
@@ -265,5 +269,12 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
         UIManager.Instance.SetStartSceneUI();
+    }
+
+    public void OnEndEditIntroInputField(string s)
+    {
+        Debug.Log(s);
+        Player.Name = s;
+        
     }
 }

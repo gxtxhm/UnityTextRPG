@@ -5,14 +5,35 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UtilTextManager : MonoBehaviour
 {
     // 새로 만들어서 0.1초텀으로 텍스트 출력하는 거만들고, 씬넘어갈때 장면만들기.
-    //private UtilTextManager 
+    public static UtilTextManager Instance { get; private set; }
 
+    public void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+    }
+
+    public void Init()
+    {
+        
+    }
+    #region 텍스트 데이터
+    public static string IntroMainScene { get; } =
+        "어둠의 그림자가 세상을 덮쳤다.\n"+
+        "당신은 이 세계를 구할 유일한 용사로 선택받았다.\n"+
+        "지금부터의 여정은 쉽지 않을 것이다.\n" +
+        "당신의 선택과 용기가 모든 것을 바꿀 것이다.\n\n" + 
+        "용사의 이름은 무엇입니까?";
 
     public static string MainMenuChoice { get; } = 
         "무엇을 하시겠습니까?\n1. 마을로 이동\n2. 던전 탐험\n3. 캐릭터 상태 확인\n4. 게임 종료\n";
@@ -103,19 +124,20 @@ public class UtilTextManager : MonoBehaviour
     public static string ClearBoss { get; } =
         "당신은 최종 보스를 물리치고 세계를 구했습니다. 마을 사람들은 당신을 영웅으로 칭송합니다.\r\n" +
         "새로운 모험이 기다리고 있을지도 모릅니다. 다시 도전하시겠습니까?";
-
+    #endregion
     // 문자열 받아서 한글자씩 띄우는 함수 만들기
-    public void PrintStringByTick(string s, float interval,TextMeshProUGUI text)
+    public void PrintStringByTick(string s, float interval,TextMeshProUGUI text,Action action)
     {
-        StartCoroutine(PlayByTick(s, interval, text));
+        StartCoroutine(PlayByTick(s, interval, text,action));
     }
 
-    IEnumerator PlayByTick(string s, float interval, TextMeshProUGUI text)
+    IEnumerator PlayByTick(string s, float interval, TextMeshProUGUI text, Action action)
     {
         foreach(char c in s)
         {
             text.text += c;
             yield return new WaitForSeconds(interval);
         }
+        action?.Invoke();
     }
 }
