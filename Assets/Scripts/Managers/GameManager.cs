@@ -92,10 +92,6 @@ public class GameManager : MonoBehaviour
         "지금부터의 여정은 쉽지 않을 것이다.\n" +
         "당신의 선택과 용기가 모든 것을 바꿀 것이다.\n\n",30);*/
 
-        Debug.Log("조작 방법을 알려드리겠습니다.\n\n");
-
-        Debug.Log("조작 방법:\n1. 숫자를 입력하여 선택지를 고릅니다.\n" +
-            "2. 전투 중에는 '1'을 입력해 공격\n '2'를 입력해 아이템 사용.\n3. 게임 종료는 '0'을 입력하세요.\n");
 
         Debug.Log("용사의 이름은 무엇인가?\n");
         Player.Name = Console.ReadLine();

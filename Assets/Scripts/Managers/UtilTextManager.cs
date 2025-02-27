@@ -1,11 +1,19 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
-internal static class UtilTextManager
+public class UtilTextManager : MonoBehaviour
 {
+    // 새로 만들어서 0.1초텀으로 텍스트 출력하는 거만들고, 씬넘어갈때 장면만들기.
+    //private UtilTextManager 
+
+
     public static string MainMenuChoice { get; } = 
         "무엇을 하시겠습니까?\n1. 마을로 이동\n2. 던전 탐험\n3. 캐릭터 상태 확인\n4. 게임 종료\n";
 
@@ -97,13 +105,17 @@ internal static class UtilTextManager
         "새로운 모험이 기다리고 있을지도 모릅니다. 다시 도전하시겠습니까?";
 
     // 문자열 받아서 한글자씩 띄우는 함수 만들기
-    static void PrintStringByTick(string s, int interval)
+    public void PrintStringByTick(string s, float interval,TextMeshProUGUI text)
     {
-        foreach (char c in s)
+        StartCoroutine(PlayByTick(s, interval, text));
+    }
+
+    IEnumerator PlayByTick(string s, float interval, TextMeshProUGUI text)
+    {
+        foreach(char c in s)
         {
-            Console.Write(c);
-            // TODO : 코루틴으로 바꿔야함
-            //Thread.Sleep(interval);
+            text.text += c;
+            yield return new WaitForSeconds(interval);
         }
     }
 }
