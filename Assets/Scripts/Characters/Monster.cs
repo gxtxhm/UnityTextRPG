@@ -70,8 +70,10 @@ public class Monster : MonoBehaviour, IGameCharacter
 
     public void TakeDamage(int damage)
     {
-        Hp -= damage;
+        //Hp -= damage;
         Debug.Log($"{Name}에게 데미지{damage}를 입혔습니다. {Name}의 체력 : {Hp}");
+
+        //StartCoroutine(UIManager.Instance.SliderEffect(Hp,))
     }
 
     void Dead()

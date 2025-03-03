@@ -89,18 +89,49 @@ public class Player : MonoBehaviour, IGameCharacter
         Hp -= (int)(damage*DefenseRate);
     }
 
-    public void GetExp(int value)
+    IEnumerator PlayLevelUp(int value)
     {
+        bool isPlaying = false;
+
         while (value >= MaxExp)
         {
+            isPlaying = true;
+            //StartCoroutine(UIManager.Instance.SliderEffect(_exp, MaxExp, MaxExp, UIManager.Instance.PlayerExpSlider, 
+            //    () => { isPlaying = false; }));
+            while(isPlaying==true)
+            {
+                yield return new WaitForSeconds(0.01f);
+            }
             Level++;
             Debug.Log($"레벨업 했습니다! 현재 레벨 : {Level}");
             AttackPower *= 2;
             Hp = 100;
+            _exp = 0;
             MaxExp *= 2;
             value = (value - MaxExp > 0) ? value - MaxExp : 0;
+
+            yield return new WaitForSeconds(0.3f);
         }
-        _exp = value;
+        
+        if(_exp < value)
+        {
+            isPlaying = true;
+            //StartCoroutine(UIManager.Instance.SliderEffect(_exp, value, MaxExp, UIManager.Instance.PlayerExpSlider,
+            //() => { isPlaying = false; }));
+            while (isPlaying == true)
+            {
+                yield return new WaitForSeconds(0.01f);
+            }
+            _exp = value;
+        }
+        UIManager.Instance.UpdateUI();
+        GameManager.Instance.NextStep();
+    }
+
+    public void GetExp(int value)
+    {
+        StartCoroutine(PlayLevelUp(value));
+        
     }
     void Dead()
     {

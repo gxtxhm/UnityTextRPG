@@ -207,7 +207,7 @@ public class UIManager : MonoBehaviour
         panel.SetActive(false);
     }
 
-    public IEnumerator SliderEffect(int start, int end, GameObject slider)
+    public IEnumerator SliderEffect(int start, int end, int maxValue, GameObject slider,float duration = 1, Action action = null)
     {
         Image s = slider.GetComponentInChildren<Image>();
         TextMeshProUGUI t = slider.GetComponentInChildren<TextMeshProUGUI>();
@@ -216,13 +216,19 @@ public class UIManager : MonoBehaviour
         {
             yield break;
         }
-        while (start <= end)
+
+        float startValue = s.fillAmount;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
         {
-            t.text = $"{start}/{end}";
-            s.fillAmount = (float)start / end;
+            t.text = $"{start}/{maxValue}";
+            s.fillAmount = (float)start / maxValue;
             Canvas.ForceUpdateCanvases();
+            
             yield return new WaitForSeconds(0.05f);
         }
+        action?.Invoke();
     }
 
     public GameObject CreateNextChoicePanel()
