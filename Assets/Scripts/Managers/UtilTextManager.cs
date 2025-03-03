@@ -147,25 +147,30 @@ public class UtilTextManager : MonoBehaviour
     IEnumerator PlayByTick(string s, float interval, TextMeshProUGUI text, Action action,bool isReset)
     {
         IsUsed = true;
-        text.text = (isReset==true)? "" : text.text+"\n"; 
-        foreach(char c in s)
+        text.text = (isReset==true)? "" : text.text+"\n";
+
+        ScrollRect sc = text.GetComponentInParent<ScrollRect>();
+
+        foreach (char c in s)
         {
             if(GameManager.Instance.IsSkip)
             {
-                text.text = s; 
-                GameManager.Instance.IsSkip = false;
+                text.text = s;
+                UIManager.Instance.UpdateCanvas(sc);
                 break;
             }
             text.text += c;
+            UIManager.Instance.UpdateCanvas(sc);
             yield return new WaitForSeconds(interval);
         }
-        ScrollRect sc = text.GetComponentInParent<ScrollRect>();
-        if(sc != null)
+        while(Input.GetKeyDown(KeyCode.Space)==false)
         {
-            Canvas.ForceUpdateCanvases();
-            sc.verticalNormalizedPosition = 0f;
+            yield return null;
         }
+        UIManager.Instance.UpdateCanvas(sc);
         action?.Invoke();
+        //UIManager.Instance.UpdateUI();
+        GameManager.Instance.IsSkip = false;
         IsUsed = false;
     }
 }

@@ -9,6 +9,8 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
+using Newtonsoft.Json.Linq;
 
 public class Player : MonoBehaviour, IGameCharacter
 {
@@ -24,21 +26,7 @@ public class Player : MonoBehaviour, IGameCharacter
 
     public string Name { get; set; }
     public int Level { get; set; } = 1;
-    public int Exp { get { return _exp; } 
-        set 
-        {
-            while (value >= MaxExp)
-            {
-                Level++;
-                Debug.Log($"레벨업 했습니다! 현재 레벨 : {Level}");
-                AttackPower *= 2;
-                Hp = 100;
-                MaxExp *= 2;
-                value = (value - MaxExp > 0)? value-MaxExp : 0;
-            }
-                _exp = value; 
-        } 
-    }
+    public int Exp { get { return _exp; } set {GetExp(value);} }
     public int MaxExp { get; set; } = 10;
     public int Hp { get { return _hp; }
         set {
@@ -67,6 +55,16 @@ public class Player : MonoBehaviour, IGameCharacter
         this.Name = Name;
     }
 
+    public IEnumerator ExpEffect(int exp, GameObject slider, Action action = null)
+    {
+        while(Input.GetKeyDown(KeyCode.Space)==false)
+        {
+            yield return null;
+        }
+
+        action?.Invoke();
+    }
+
     public void PlayAttack()
     {
         Debug.Log("플레이어가 공격모션을 실행합니다. in Player");
@@ -91,11 +89,19 @@ public class Player : MonoBehaviour, IGameCharacter
         Hp -= (int)(damage*DefenseRate);
     }
 
-    public void GetExp(int exp)
+    public void GetExp(int value)
     {
-        Exp += exp;
+        while (value >= MaxExp)
+        {
+            Level++;
+            Debug.Log($"레벨업 했습니다! 현재 레벨 : {Level}");
+            AttackPower *= 2;
+            Hp = 100;
+            MaxExp *= 2;
+            value = (value - MaxExp > 0) ? value - MaxExp : 0;
+        }
+        _exp = value;
     }
-
     void Dead()
     {
        

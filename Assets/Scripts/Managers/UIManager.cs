@@ -5,6 +5,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
+using System.Xml.Schema;
 
 public class UIManager : MonoBehaviour
 {
@@ -184,6 +185,13 @@ public class UIManager : MonoBehaviour
         CharacterInfoObject.SetActive(true);
     }
     
+    public void UpdateCanvas(ScrollRect rect = null)
+    {
+        Canvas.ForceUpdateCanvases();
+        if(rect != null)
+            rect.verticalNormalizedPosition = 0f;
+    }
+
     public IEnumerator FadeOutCo(GameObject panel, float duration)
     {
         CanvasGroup i = panel.GetComponent<CanvasGroup>();
@@ -197,6 +205,24 @@ public class UIManager : MonoBehaviour
             yield return null;
         }
         panel.SetActive(false);
+    }
+
+    public IEnumerator SliderEffect(int start, int end, GameObject slider)
+    {
+        Image s = slider.GetComponentInChildren<Image>();
+        TextMeshProUGUI t = slider.GetComponentInChildren<TextMeshProUGUI>();
+
+        if (s == null || t == null)
+        {
+            yield break;
+        }
+        while (start <= end)
+        {
+            t.text = $"{start}/{end}";
+            s.fillAmount = (float)start / end;
+            Canvas.ForceUpdateCanvases();
+            yield return new WaitForSeconds(0.05f);
+        }
     }
 
     public GameObject CreateNextChoicePanel()

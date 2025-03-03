@@ -25,6 +25,8 @@ public class GameManager : MonoBehaviour
 
     public bool IsSkip = false;
 
+    public bool IsPlayingCo = false;
+
     public static int MonsterCount { get; } = 3;
 
     private GameObject PlayerObj;
@@ -91,11 +93,7 @@ public class GameManager : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            //if (EventSystem.current.currentSelectedGameObject != null)
-            //{
-            //    EventSystem.current.SetSelectedGameObject(null);
-            //}
-            if(UtilTextManager.Instance.IsUsed && !IsSkip)
+            if(UtilTextManager.Instance.IsUsed && IsSkip==false)
             {
                 IsSkip = true;
             }
@@ -107,9 +105,15 @@ public class GameManager : MonoBehaviour
         UtilTextManager.Instance.PrintStringByTick(
             $"{monsters[CurCount].Name}을 물리쳤습니다! " +
             $"경험치 {monsters[CurCount].Exp}를 획득했습니다.", 0.05f, UIManager.Instance.BattleContext,
-            () => { Player.GetExp(monsters[CurCount].Exp); NextStep(); });
+            () => 
+            {
+                Player.Exp+=monsters[CurCount].Exp;
+                // 경험치 오르는 효과 코루틴으로 
+                
+                //UIManager.Instance.UpdateUI();
+                //NextStep();
+            });
 
-        
     }
 
     public Monster GetCurMonster()
@@ -320,6 +324,5 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log(s);
         Player.Name = s;
-        
     }
 }
