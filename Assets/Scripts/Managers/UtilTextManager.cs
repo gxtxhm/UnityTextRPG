@@ -11,8 +11,9 @@ using UnityEngine.UI;
 
 public class UtilTextManager : MonoBehaviour
 {
-    // 새로 만들어서 0.1초텀으로 텍스트 출력하는 거만들고, 씬넘어갈때 장면만들기.
     public static UtilTextManager Instance { get; private set; }
+
+    public bool IsUsed = false;
 
     public void Awake()
     {
@@ -43,7 +44,7 @@ public class UtilTextManager : MonoBehaviour
     public static string EnterDungeon { get; } = "당신은 던전의 입구에 서 있습니다.\n" +
     "차가운 바람이 얼굴을 스치고, 어두운 안개가 던전 깊숙이 흘러갑니다.\n" +
     "입구 근처에는 오래된 경고문이 적혀 있습니다:\n" +
-    "모든 준비가 갖춰졌는가? 용기를 낼 때, 비로소 길이 열릴 것이다.\n\n1. 던전에 들어간다.\n2. 마을로 돌아간다.";
+    "모든 준비가 갖춰졌는가? 용기를 낼 때, 비로소 길이 열릴 것이다.\n\nO. 던전에 들어간다.\nX. 마을로 돌아간다.";
 
     public static string ExitDungeonEntrance { get; } =
         "당신은 잠시 던전 입구에서 머뭇거리다 발길을 돌립니다. " +
@@ -126,18 +127,45 @@ public class UtilTextManager : MonoBehaviour
         "새로운 모험이 기다리고 있을지도 모릅니다. 다시 도전하시겠습니까?";
     #endregion
     // 문자열 받아서 한글자씩 띄우는 함수 만들기
-    public void PrintStringByTick(string s, float interval,TextMeshProUGUI text,Action action)
+    public void PrintStringByTick(string s, float interval,TextMeshProUGUI text,Action action,bool isReset=false)
     {
-        StartCoroutine(PlayByTick(s, interval, text,action));
+        if(IsUsed)
+            StartCoroutine(WaitUsed(s,interval,text,action,isReset));
+        else
+            StartCoroutine(PlayByTick(s, interval, text,action,isReset));
     }
 
-    IEnumerator PlayByTick(string s, float interval, TextMeshProUGUI text, Action action)
+    IEnumerator WaitUsed(string s, float interval, TextMeshProUGUI text, Action action, bool isReset)
     {
+        while(IsUsed)
+        {
+            yield return null;
+        }
+        StartCoroutine(PlayByTick(s,interval, text,action,isReset));
+    }
+
+    IEnumerator PlayByTick(string s, float interval, TextMeshProUGUI text, Action action,bool isReset)
+    {
+        IsUsed = true;
+        text.text = (isReset==true)? "" : text.text+"\n"; 
         foreach(char c in s)
         {
+            if(GameManager.Instance.IsSkip)
+            {
+                text.text = s; 
+                GameManager.Instance.IsSkip = false;
+                break;
+            }
             text.text += c;
             yield return new WaitForSeconds(interval);
         }
+        ScrollRect sc = text.GetComponentInParent<ScrollRect>();
+        if(sc != null)
+        {
+            Canvas.ForceUpdateCanvases();
+            sc.verticalNormalizedPosition = 0f;
+        }
         action?.Invoke();
+        IsUsed = false;
     }
 }

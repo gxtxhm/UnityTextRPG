@@ -4,10 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public enum ResultBattle
 {
@@ -20,7 +23,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    
+    public bool IsSkip = false;
 
     public static int MonsterCount { get; } = 3;
 
@@ -28,24 +31,30 @@ public class GameManager : MonoBehaviour
     public Player Player;
     public List<Monster> monsters;
 
+    public int CurCount = 0;
     Boss _boss;
     public Boss Boss { get { return _boss; } }
 
     public void Init()
     {
+        CurCount = 0;
         //Player = new Player();
         GameObject playerPrefab = Resources.Load<GameObject>("Prefabs/Player");
         PlayerObj = Instantiate(playerPrefab);
         Player = PlayerObj.GetComponent<Player>();
+        
         monsters = new List<Monster>();
+        GameObject monsterprefab = Resources.Load<GameObject>("Prefabs/Monster");
         for (int i = 0; i < MonsterCount; i++)
         {
-            monsters.Add(new Monster());
+            monsters.Add(Instantiate(monsterprefab).GetComponent<Monster>());
             monsters[i].OnDeadEvent += BroadcastMonsterDead;
+            monsters[i].OnDeadEvent += KillMonster;
         }
 
-        _boss = new Boss();
+        _boss = Instantiate(Resources.Load<GameObject>("Prefabs/Boss")).GetComponent<Boss>();
         _boss.OnDeadEvent += BroadcastMonsterDead;
+        _boss.OnDeadEvent += KillMonster;
         // 이벤트 등록
 
         Player.OnDeadEvent += GameOver;
@@ -68,11 +77,44 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             DontDestroyOnLoad(Player);
             DontDestroyOnLoad(PlayerObj);
+            foreach(Monster monster in monsters)
+                DontDestroyOnLoad (monster);
+            DontDestroyOnLoad(Boss);
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+
+    public void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            //if (EventSystem.current.currentSelectedGameObject != null)
+            //{
+            //    EventSystem.current.SetSelectedGameObject(null);
+            //}
+            if(UtilTextManager.Instance.IsUsed && !IsSkip)
+            {
+                IsSkip = true;
+            }
+        }
+    }
+
+    public void KillMonster()
+    {
+        UtilTextManager.Instance.PrintStringByTick(
+            $"{monsters[CurCount].Name}을 물리쳤습니다! " +
+            $"경험치 {monsters[CurCount].Exp}를 획득했습니다.", 0.05f, UIManager.Instance.BattleContext,
+            () => { Player.GetExp(monsters[CurCount].Exp); NextStep(); });
+
+        
+    }
+
+    public Monster GetCurMonster()
+    {
+        return monsters[CurCount];
     }
 
     public List<Monster> FindHalfHpMonster()
@@ -88,133 +130,135 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void PlayStartScene()
-    {
-        /*PrintStringByTick("어둠의 그림자가 세상을 덮쳤다.\n" +
-        "당신은 이 세계를 구할 유일한 용사로 선택받았다.\n" +
-        "지금부터의 여정은 쉽지 않을 것이다.\n" +
-        "당신의 선택과 용기가 모든 것을 바꿀 것이다.\n\n",30);*/
-
-
-        Debug.Log("용사의 이름은 무엇인가?\n");
-        Player.Name = Console.ReadLine();
-    }
-
     public void PrintPlayerInfo()
     {
         Debug.Log("캐릭터 상태창입니다.");
         //Player.PrintInfo();
         GameObject item = UIManager.Instance.CreatePlayerInfoPanel();
+        if (item == null) return;
         ItemManager.Instance.PrintInventory();
     }
-
-    //public void ExitGame()
-    //{
-    //    Debug.Log("게임을 종료합니다.");
-    //    Environment.Exit(0);
-    //}
-
-    //public void PrintMainMenu()
-    //{
-    //    Debug.Log(UtilTextManager.MainMenuChoice);
-    //}
-
-
 
     public void MoveTown()
     {
         Debug.Log(UtilTextManager.EnterTown);
+        StartCoroutine(LoadMainScene());
     }
 
+    // 로드 배틀씬 후에 배틀씬에서의 동작완성하기
     public void MoveDungeon()
     {
         Debug.Log(UtilTextManager.EnterDungeon);
 
+        StartCoroutine(LoadBattleScene());
+
         //PlayDungeon(Player);
     }
 
-    void PlayDungeon(Player player)
+    IEnumerator LoadBattleScene()
     {
-        // 던전 입장
-        int count = 0;// 몬스터 등장 횟수
-        int choice;
-        for (int i = 0; i < GameManager.MonsterCount; i++)
+        AsyncOperation operation = SceneManager.LoadSceneAsync("BattleScene");
+
+        while (!operation.isDone)
         {
-            Debug.Log(UtilTextManager.DungeonAppearedMonster[count]);
-
-            ResultBattle result = BattleManager.Instance.StartBattle(player, monsters[count]);
-
-            if (result == ResultBattle.RetreatPlayer) return;
-            else if (result == ResultBattle.PlayerDie)
-            {
-                Debug.Log(UtilTextManager.PlayerDead); return;
-            }
-            else
-            {
-                Debug.Log($"{GameManager.Instance.monsters[count].Name}을 물리쳤습니다! " +
-                    $"경험치 {GameManager.Instance.monsters[count].Exp}를 획득했습니다.\r\n");
-                player.GetExp(GameManager.Instance.monsters[count].Exp);
-            }
-
-            Debug.Log(UtilTextManager.NextStepChoice);
-
-            choice = int.Parse(Console.ReadLine());
-
-            if (choice == 1)
-            {
-                Debug.Log(UtilTextManager.DungeonContinue[count]);
-            }
-            else if (choice == 2)
-            {
-                Debug.Log(UtilTextManager.MoveTownAfterBattle);
-                return;
-            }
-            else
-            {
-
-                // 0~99 범위의 난수 생성
-                int randomValue = UnityEngine.Random.Range(0, 100);
-
-                if (randomValue < 45)
-                {
-                    Item randitem = ItemManager.Instance.RandomCreateItem();
-                    Debug.Log("당신은 주변을 탐색하던 중 희미하게 빛나는 물체를 발견했습니다.\r\n" +
-                        $"가까이 다가가 확인하니, {randitem.Name}을(를) 발견했습니다!\r\n" +
-                        "이 아이템은 당신의 여정에 큰 도움이 될 것입니다.");
-                }
-                else
-                {
-                    Debug.Log("당신은 주변을 탐색했지만, 특별한 것을 발견하지 못했습니다.\r\n" +
-                        "어둠 속에서는 아무것도 보이지 않으며, 조용히 다시 길을 준비합니다.");
-                }
-
-                Debug.Log(UtilTextManager.DungeonContinue[count]);
-            }
-            count++;
+            yield return null;
         }
+        UIManager.Instance.SetBattleSceneUI();
+    }
 
-        // 보스등장
-        Debug.Log(UtilTextManager.AppearedBoss);
+    public void NextStep()
+    {
+        UIManager.Instance.CharacterInfoObject.SetActive(false);
 
-        ResultBattle resultBattle = BattleManager.Instance.StartBattle(player, GameManager.Instance.Boss);
+        Debug.Log(UtilTextManager.NextStepChoice);
+        UtilTextManager.Instance.PrintStringByTick(UtilTextManager.NextStepChoice, 0.05f,
+            UIManager.Instance.BattleContext, () => { UIManager.Instance.CreateNextChoicePanel(); }, true);
+    }
 
-        if (resultBattle == ResultBattle.PlayerDie)
+    public void OnMoveTownAfterDungeonButton()
+    {
+        UtilTextManager.Instance.PrintStringByTick(UtilTextManager.MoveTownAfterBattle, 0.05f,
+            UIManager.Instance.BattleContext, () => {/*TODO : Fade  Out */ },true);
+    }
+
+    public void OnContinueButton()
+    {
+        UtilTextManager.Instance.PrintStringByTick(UtilTextManager.DungeonContinue[CurCount], 0.05f,
+            UIManager.Instance.BattleContext, () => { }, true);
+        CurCount++;
+        PlayDungeon(Player);
+    }
+
+    public void OnExploreButton()
+    {
+        Explore();
+
+        CurCount++;
+        PlayDungeon(Player);
+    }
+
+    public void Explore()
+    {
+        //0~99 범위의 난수 생성
+        int randomValue = UnityEngine.Random.Range(0, 100);
+
+        if (randomValue < 45)
         {
-            Debug.Log(UtilTextManager.PlayerDead); return;
+            Item randitem = ItemManager.Instance.RandomCreateItem();
+            UtilTextManager.Instance.PrintStringByTick("당신은 주변을 탐색하던 중 희미하게 빛나는 물체를 발견했습니다.\r\n" +
+                $"가까이 다가가 확인하니, {randitem.Name}을(를) 발견했습니다!\r\n" +
+                "이 아이템은 당신의 여정에 큰 도움이 될 것입니다.",0.05f,UIManager.Instance.BattleContext,
+                () => { });
         }
         else
         {
-            Debug.Log($"{GameManager.Instance.Boss.Name}을 물리쳤습니다! " +
-                $"경험치 {GameManager.Instance.Boss.Exp}를 획득했습니다.\r\n");
-            player.GetExp(GameManager.Instance.Boss.Exp);
+            UtilTextManager.Instance.PrintStringByTick("당신은 주변을 탐색했지만, 특별한 것을 발견하지 못했습니다.\r\n" +
+                "어둠 속에서는 아무것도 보이지 않으며, 조용히 다시 길을 준비합니다.",0.05f,
+                UIManager.Instance.BattleContext, () => { });
+        }
 
-            Debug.Log(UtilTextManager.ClearBoss);
+        UtilTextManager.Instance.PrintStringByTick(UtilTextManager.DungeonContinue[CurCount],0.01f,
+            UIManager.Instance.BattleContext, () => { },true);
+    }
+
+    public void PlayDungeon(Player player)
+    {
+        // 던전 입장
+        //int count = 0;// 몬스터 등장 횟수
+        //int choice;
+        //for (int i = 0; i < GameManager.MonsterCount; i++)
+        {
+            UtilTextManager.Instance.PrintStringByTick(UtilTextManager.DungeonAppearedMonster[CurCount], 0.05f,
+                UIManager.Instance.BattleContext, () => { 
+                    UIManager.Instance.UpdateUI();
+                    BattleManager.Instance.StartBattle(player, GetCurMonster());
+                },true);
+            Debug.Log(UtilTextManager.DungeonAppearedMonster[CurCount]);
+
+        //// 보스등장
+        //Debug.Log(UtilTextManager.AppearedBoss);
+
+        //ResultBattle resultBattle = BattleManager.Instance.StartBattle(player, GameManager.Instance.Boss);
+
+        //if (resultBattle == ResultBattle.PlayerDie)
+        //{
+        //    Debug.Log(UtilTextManager.PlayerDead); return;
+        //}
+        //else
+        //{
+        //    Debug.Log($"{GameManager.Instance.Boss.Name}을 물리쳤습니다! " +
+        //        $"경험치 {GameManager.Instance.Boss.Exp}를 획득했습니다.\r\n");
+        //    player.GetExp(GameManager.Instance.Boss.Exp);
+
+        //    Debug.Log(UtilTextManager.ClearBoss);
         }
     }
 
     void GameOver()
     {
         Debug.Log("플레이어가 사망하여 게임이 종료되었습니다. in GameManager");
+        UtilTextManager.Instance.PrintStringByTick("플레이어가 사망하여 게임이 종료되었습니다", 0.05f,
+            UIManager.Instance.BattleContext, () => { });
     }
 
     void BroadcastPlayerAttack()
@@ -236,9 +280,10 @@ public class GameManager : MonoBehaviour
     public void OnStartButton()
     {
         Debug.Log("StartBtn");
-        StartCoroutine(LoadMainScene());
+        MoveTown();
     }
     
+
     IEnumerator LoadMainScene()
     {
         AsyncOperation operation = SceneManager.LoadSceneAsync("MainScene");

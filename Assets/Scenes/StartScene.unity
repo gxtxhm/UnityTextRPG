@@ -1011,6 +1011,7 @@ GameObject:
   - component: {fileID: 2121277998}
   - component: {fileID: 2121278000}
   - component: {fileID: 2121278001}
+  - component: {fileID: 2121278002}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1030,8 +1031,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7668b4687117b4c48a7e007ebeb6f0c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsSkip: 0
   Player: {fileID: 0}
   monsters: []
+  CurCount: 0
 --- !u!4 &2121277999
 Transform:
   m_ObjectHideFlags: 0
@@ -1059,6 +1062,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b86aa70bc26b8149986364155e067b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsUsed: 0
 --- !u!114 &2121278001
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1080,9 +1084,30 @@ MonoBehaviour:
   IntroText: {fileID: 0}
   IntroInputField: {fileID: 0}
   LastText: {fileID: 0}
-  optionBtn1: {fileID: 0}
-  optionBtn2: {fileID: 0}
-  optionBtn3: {fileID: 0}
+  PlayerInfoPanel: {fileID: 0}
+  ExitDungeonBtn: {fileID: 0}
+  InventoryBtn: {fileID: 0}
+  AttackBtn: {fileID: 0}
+  BattleContext: {fileID: 0}
+  CharacterInfoObject: {fileID: 0}
+  PlayerNameText: {fileID: 0}
+  EnemyNameText: {fileID: 0}
+  PlayerSlider: {fileID: 0}
+  EnemySlider: {fileID: 0}
+  PlayerExpSlider: {fileID: 0}
+  LevelText: {fileID: 0}
+--- !u!114 &2121278002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121277997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 234b4575ccd3f5a4e8d9186c0816b0c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

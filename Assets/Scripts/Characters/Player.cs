@@ -75,8 +75,14 @@ public class Player : MonoBehaviour, IGameCharacter
     public void Attack(Monster monster)
     {
         OnAttackEvent?.Invoke();
-        monster.TakeDamage(AttackPower);
+        UtilTextManager.Instance.PrintStringByTick($"용사{Name}가 {monster.Name}을 공격!", 0.005f,
+            UIManager.Instance.BattleContext, () =>
+            {
+                monster.TakeDamage(AttackPower);
+                //if (monster.Hp <= 0)
+                    //GameManager.Instance.KillMonster();
 
+            }, false);
     }
 
     public void TakeDamage(int damage)
@@ -92,6 +98,6 @@ public class Player : MonoBehaviour, IGameCharacter
 
     void Dead()
     {
-            
+       
     }
 }

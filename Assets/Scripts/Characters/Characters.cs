@@ -8,7 +8,7 @@ public interface IGameCharacter
 {
     public int Hp { get; set; }
     public int AttackPower { get; set; }
-    public string Name { get; set; }
+    public string Name { get;}
 
     //delegate void OnDead();
     //event Action OnDeadEvent;

@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine.UI;
 using System.Collections;
 
-public class UIManager : MonoBehaviour 
+public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
@@ -27,9 +27,20 @@ public class UIManager : MonoBehaviour
     GameObject PlayerInfoPanel;
 
     // BattleScene ฐüทร
-    public GameObject optionBtn1;
-    public GameObject optionBtn2;
-    public GameObject optionBtn3;
+    public GameObject ExitDungeonBtn;
+    public GameObject InventoryBtn;
+    public GameObject AttackBtn;
+
+    public TextMeshProUGUI BattleContext;
+    public GameObject CharacterInfoObject;
+    public TextMeshProUGUI PlayerNameText;
+    public TextMeshProUGUI EnemyNameText;
+    public GameObject PlayerSlider;
+    public GameObject EnemySlider;
+    public GameObject PlayerExpSlider;
+    public GameObject LevelText;
+
+    public GameObject NextChoicePanel;
 
     public void Awake()
     {
@@ -72,7 +83,7 @@ public class UIManager : MonoBehaviour
             IntroText == null || IntroInputField == null ||
             LastText == null)
         {
-            Debug.Log("Error Find Buttons in SetMainSceneUI");return;
+            Debug.Log("Error Find Buttons in SetMainSceneUI"); return;
         }
 
         playerInfoBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.PrintPlayerInfo);
@@ -80,7 +91,8 @@ public class UIManager : MonoBehaviour
         MainMenuBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.OnMainMenuButton);
         IntroInputField.GetComponent<TMP_InputField>().onEndEdit.AddListener(CompleteInputName);
 
-        UtilTextManager.Instance.PrintStringByTick("hi"/*UtilTextManager.IntroMainScene*/, 0.05f, IntroText, 
+        //IntroInputField.SetActive(false);
+        UtilTextManager.Instance.PrintStringByTick(UtilTextManager.IntroMainScene, 0.05f, IntroText,
             () => { IntroInputField.SetActive(true); });
     }
 
@@ -97,12 +109,80 @@ public class UIManager : MonoBehaviour
     public void SetBattleSceneUI()
     {
         GameObject buttonsPanel = GameObject.Find("ButtonsPanel");
-        if (buttonsPanel == null) return;
-        optionBtn1 = buttonsPanel.transform.Find("Option1").gameObject;
-        optionBtn2 = buttonsPanel.transform.Find("Option2").gameObject;
-        optionBtn3 = buttonsPanel.transform.Find("Option3").gameObject;
+        BattleContext = GameObject.Find("BattleContext").GetComponent<TextMeshProUGUI>();
+        PlayerNameText = GameObject.Find("PlayerText").GetComponent<TextMeshProUGUI>();
+        EnemyNameText = GameObject.Find("EnemyText").GetComponent<TextMeshProUGUI>();
+
+        CharacterInfoObject = GameObject.Find("CharacterInfo");
+        PlayerSlider = GameObject.Find("PlayerSlider");
+        EnemySlider = GameObject.Find("EnemySlider");
+        PlayerExpSlider = GameObject.Find("PlayerExpSlider");
+        LevelText = GameObject.Find("LevelText");
+
+        CharacterInfoObject.SetActive(false);
+
+        if (buttonsPanel == null || BattleContext == null
+            || PlayerNameText == null || EnemyNameText == null ||
+            PlayerSlider == null || EnemySlider == null ||
+            PlayerExpSlider == null || LevelText == null)
+        {
+            Debug.Log("SetBattleSceneUI Error");
+            return;
+        }
+        
+        ExitDungeonBtn = buttonsPanel.transform.Find("ExitDeungeonBtn").gameObject;
+        ExitDungeonBtn.GetComponent<Button>().onClick.AddListener(BattleManager.Instance.OnExitButton);
+
+        InventoryBtn = buttonsPanel.transform.Find("InventoryBtn").gameObject;
+        InventoryBtn.GetComponent<Button>().onClick.AddListener(BattleManager.Instance.OnInventoryButton);
+
+        AttackBtn = buttonsPanel.transform.Find("AttackBtn").gameObject;
+        AttackBtn.GetComponent<Button>().onClick.AddListener(BattleManager.Instance.OnAttackButton);
+
+        //ExitDungeonBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.MoveTown);
+
+        GameObject choicebox = CreateItemUI("Prefabs/ChoiceBox");
+        Button[] buttons = choicebox.GetComponentsInChildren<Button>();
+        choicebox.SetActive(false);
+
+        buttons[0].onClick.AddListener(() => { choicebox.SetActive(false); GameManager.Instance.PlayDungeon(GameManager.Instance.Player); });
+        buttons[1].onClick.AddListener(()=> { choicebox.SetActive(false); GameManager.Instance.MoveTown();  });
+        choicebox.transform.SetParent(GameObject.Find("Canvas").transform, false);
+
+        UtilTextManager.Instance.PrintStringByTick(UtilTextManager.EnterDungeon, 0.05f, BattleContext, () => { choicebox.SetActive(true); });
+        
     }
 
+    public GameObject CreateItemUI(string address)
+    {
+        GameObject item = Resources.Load<GameObject>(address);
+        GameObject gameObject = Instantiate(item);
+
+        return gameObject;
+    }
+
+    public void UpdateUI()
+    {
+        Monster monster = GameManager.Instance.GetCurMonster();
+        PlayerNameText.text = GameManager.Instance.Player.Name;
+        PlayerSlider.GetComponentInChildren<Image>().fillAmount = 
+            (float)GameManager.Instance.Player.Hp / GameManager.Instance.Player.MaxHp;
+        PlayerSlider.GetComponentInChildren<TextMeshProUGUI>().text = GameManager.Instance.Player.Hp.ToString();
+
+        PlayerExpSlider.GetComponentInChildren<Image>().fillAmount =
+            (float)GameManager.Instance.Player.Exp / GameManager.Instance.Player.MaxExp;
+        PlayerExpSlider.GetComponentInChildren<TextMeshProUGUI>().text = 
+            $"{GameManager.Instance.Player.Exp.ToString()} / {GameManager.Instance.Player.MaxExp.ToString()}";
+
+        LevelText.GetComponent<TextMeshProUGUI>().text = $"Lv {GameManager.Instance.Player.Level.ToString()}";
+
+        EnemyNameText.text = monster.Name;
+        EnemySlider.GetComponentInChildren<Image>().fillAmount =
+            (float)monster.Hp / monster.MaxHp;
+        EnemySlider.GetComponentInChildren<TextMeshProUGUI>().text = monster.Hp.ToString();
+
+        CharacterInfoObject.SetActive(true);
+    }
     
     public IEnumerator FadeOutCo(GameObject panel, float duration)
     {
@@ -119,8 +199,27 @@ public class UIManager : MonoBehaviour
         panel.SetActive(false);
     }
 
+    public GameObject CreateNextChoicePanel()
+    {
+        if (NextChoicePanel != null) return null;
+        GameObject panelPrefab = Resources.Load<GameObject>("Prefabs/NextChoiceBox");
+        GameObject panel = Instantiate(panelPrefab);
+        panel.transform.SetParent(GameObject.Find("Canvas").transform, false);
+
+        NextChoicePanel = panel;
+
+        
+        Button[] buttons = panel.GetComponentsInChildren<Button>();
+        buttons[0].onClick.AddListener(() => { GameManager.Instance.OnContinueButton();Destroy(panel); } );
+        buttons[1].onClick.AddListener(()=> { GameManager.Instance.OnMoveTownAfterDungeonButton(); Destroy(panel); } );
+        buttons[2].onClick.AddListener(()=> { GameManager.Instance.OnExploreButton(); Destroy(panel); } );
+
+        return panel;
+    }
+
     public GameObject CreatePlayerInfoPanel()
     {
+        if (PlayerInfoPanel != null) return null;
         GameObject playerInfoPanelPrefab = Resources.Load<GameObject>("Prefabs/PlayerInfoPanel");
         GameObject panel = Instantiate(playerInfoPanelPrefab);
         panel.transform.SetParent(GameObject.Find("Canvas").transform,false);
@@ -144,5 +243,26 @@ public class UIManager : MonoBehaviour
         PlayerInfoPanel = panel;
         return PlayerInfoPanel;
     }
-    
+
+    public void DeactiveChoiceButtons()
+    {
+        ExitDungeonBtn.GetComponent<Button>().interactable = false;
+        InventoryBtn.GetComponent<Button>().interactable = false;
+        AttackBtn.GetComponent<Button>().interactable = false;
+
+        Color32 c = AttackBtn.transform.parent.GetComponent<Image>().color;
+        c.a = 100;
+        AttackBtn.transform.parent.GetComponent<Image>().color = c;
+    }
+
+    public void ActiveChoiceButtons()
+    {
+        ExitDungeonBtn.GetComponent<Button>().interactable = true;
+        InventoryBtn.GetComponent<Button>().interactable = true;
+        AttackBtn.GetComponent<Button>().interactable = true;
+
+        Color32 c = AttackBtn.transform.parent.GetComponent<Image>().color;
+        c.a = 10;
+        AttackBtn.transform.parent.GetComponent<Image>().color = c;
+    }
 }
