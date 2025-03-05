@@ -86,7 +86,9 @@ public class Player : MonoBehaviour, IGameCharacter
     public void TakeDamage(int damage)
     {
         Debug.Log($"몬스터에게 데미지{damage}를 입었습니다! 현재체력 : {Hp}");
-        Hp -= (int)(damage*DefenseRate);
+        StartCoroutine(UIManager.Instance.SliderEffect(Hp, Hp - damage, MaxHp, UIManager.Instance.PlayerSlider, 1, 
+            () => { Hp -= (int)(damage * DefenseRate); UIManager.Instance.UpdateUI(); }));
+        
     }
 
     IEnumerator PlayLevelUp(int value)
@@ -96,12 +98,11 @@ public class Player : MonoBehaviour, IGameCharacter
         while (value >= MaxExp)
         {
             isPlaying = true;
-            //StartCoroutine(UIManager.Instance.SliderEffect(_exp, MaxExp, MaxExp, UIManager.Instance.PlayerExpSlider, 
-            //    () => { isPlaying = false; }));
-            while(isPlaying==true)
-            {
-                yield return new WaitForSeconds(0.01f);
-            }
+            StartCoroutine(UIManager.Instance.SliderEffect(_exp, MaxExp, MaxExp, UIManager.Instance.PlayerExpSlider, 
+                1,() => { isPlaying = false; }));
+
+            yield return new WaitUntil(()=>isPlaying==false);
+            
             Level++;
             Debug.Log($"레벨업 했습니다! 현재 레벨 : {Level}");
             AttackPower *= 2;

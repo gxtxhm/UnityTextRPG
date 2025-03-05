@@ -206,10 +206,11 @@ public class UIManager : MonoBehaviour
         }
         panel.SetActive(false);
     }
-
+    
+    // slider 와 text를 동시에 바꿈
     public IEnumerator SliderEffect(int start, int end, int maxValue, GameObject slider,float duration = 1, Action action = null)
     {
-        Image s = slider.GetComponentInChildren<Image>();
+        Slider s = slider.GetComponentInChildren<Slider>();
         TextMeshProUGUI t = slider.GetComponentInChildren<TextMeshProUGUI>();
 
         if (s == null || t == null)
@@ -217,17 +218,19 @@ public class UIManager : MonoBehaviour
             yield break;
         }
 
-        float startValue = s.fillAmount;
+        float startValue = s.value;
         float elapsedTime = 0f;
 
         while (elapsedTime < duration)
         {
-            t.text = $"{start}/{maxValue}";
-            s.fillAmount = (float)start / maxValue;
-            Canvas.ForceUpdateCanvases();
+            elapsedTime += Time.deltaTime;
+            t.text = ((int)Mathf.Lerp(start, end, Mathf.Clamp01(elapsedTime / duration))).ToString();
             
-            yield return new WaitForSeconds(0.05f);
+            s.value = Mathf.Lerp(startValue, (float)end / maxValue, Mathf.Clamp01(elapsedTime / duration));
+            
+            yield return null;
         }
+        Canvas.ForceUpdateCanvases();
         action?.Invoke();
     }
 

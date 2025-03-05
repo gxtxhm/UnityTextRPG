@@ -63,17 +63,18 @@ public class Monster : MonoBehaviour, IGameCharacter
             UIManager.Instance.BattleContext, () =>
             {
                 player.TakeDamage(AttackPower);
-                UIManager.Instance.UpdateUI();
             }, false);
         
     }
 
     public void TakeDamage(int damage)
     {
-        //Hp -= damage;
+        
         Debug.Log($"{Name}에게 데미지{damage}를 입혔습니다. {Name}의 체력 : {Hp}");
 
-        //StartCoroutine(UIManager.Instance.SliderEffect(Hp,))
+        StartCoroutine(UIManager.Instance.SliderEffect(Hp, Hp - damage, MaxHp, UIManager.Instance.EnemySlider, 1, 
+            () => { Hp -= damage; UIManager.Instance.UpdateUI(); }));
+        
     }
 
     void Dead()
