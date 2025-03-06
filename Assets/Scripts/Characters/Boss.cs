@@ -9,6 +9,14 @@ public class Boss : Monster
 {
     public Boss() : base()
     {
-        Name = "고대의 켈타르";
+        
     }
+    public override void Awake()
+    {
+        base.Awake();
+        Name = "고대의 켈타르";
+        
+    }
+    // 보스는 뭔가 더 추가하기  OnDeadEvent 여기에 , 엔딩 추가하기
+
 }

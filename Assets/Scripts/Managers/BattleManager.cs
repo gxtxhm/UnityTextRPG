@@ -73,6 +73,7 @@ internal class BattleManager : MonoBehaviour
         
     }
 
+    // 몬스터 죽을 시 중도 취소 되게끔
     IEnumerator PlayTurn(Player player, Monster monster)
     {
         player.Attack(monster);

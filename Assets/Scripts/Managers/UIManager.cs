@@ -151,7 +151,7 @@ public class UIManager : MonoBehaviour
         choicebox.transform.SetParent(GameObject.Find("Canvas").transform, false);
 
         UtilTextManager.Instance.PrintStringByTick(UtilTextManager.EnterDungeon, 0.05f, BattleContext, () => { choicebox.SetActive(true); });
-        
+        UpdateUI();
     }
 
     public GameObject CreateItemUI(string address)
@@ -166,21 +166,23 @@ public class UIManager : MonoBehaviour
     {
         Monster monster = GameManager.Instance.GetCurMonster();
         PlayerNameText.text = GameManager.Instance.Player.Name;
-        PlayerSlider.GetComponentInChildren<Image>().fillAmount = 
+        PlayerSlider.GetComponentInChildren<Slider>().value = 
             (float)GameManager.Instance.Player.Hp / GameManager.Instance.Player.MaxHp;
         PlayerSlider.GetComponentInChildren<TextMeshProUGUI>().text = GameManager.Instance.Player.Hp.ToString();
 
-        PlayerExpSlider.GetComponentInChildren<Image>().fillAmount =
+        PlayerExpSlider.GetComponentInChildren<Slider>().value =
             (float)GameManager.Instance.Player.Exp / GameManager.Instance.Player.MaxExp;
         PlayerExpSlider.GetComponentInChildren<TextMeshProUGUI>().text = 
-            $"{GameManager.Instance.Player.Exp.ToString()} / {GameManager.Instance.Player.MaxExp.ToString()}";
+            $"{GameManager.Instance.Player.Exp.ToString()}";
 
         LevelText.GetComponent<TextMeshProUGUI>().text = $"Lv {GameManager.Instance.Player.Level.ToString()}";
 
         EnemyNameText.text = monster.Name;
-        EnemySlider.GetComponentInChildren<Image>().fillAmount =
+        EnemySlider.GetComponentInChildren<Slider>().value =
             (float)monster.Hp / monster.MaxHp;
         EnemySlider.GetComponentInChildren<TextMeshProUGUI>().text = monster.Hp.ToString();
+
+
 
         CharacterInfoObject.SetActive(true);
     }

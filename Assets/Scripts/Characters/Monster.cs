@@ -33,7 +33,7 @@ public class Monster : MonoBehaviour, IGameCharacter
 
     public int AttackPower { get; set; }
         
-    public void Awake()
+    public virtual void Awake()
     {
         Init();
     }
@@ -72,6 +72,7 @@ public class Monster : MonoBehaviour, IGameCharacter
         
         Debug.Log($"{Name}에게 데미지{damage}를 입혔습니다. {Name}의 체력 : {Hp}");
 
+        int targetValue = (Hp - damage < 0) ? 0 : Hp - damage;
         StartCoroutine(UIManager.Instance.SliderEffect(Hp, Hp - damage, MaxHp, UIManager.Instance.EnemySlider, 1, 
             () => { Hp -= damage; UIManager.Instance.UpdateUI(); }));
         

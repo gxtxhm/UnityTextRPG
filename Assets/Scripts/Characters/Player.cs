@@ -114,11 +114,11 @@ public class Player : MonoBehaviour, IGameCharacter
             yield return new WaitForSeconds(0.3f);
         }
         
-        if(_exp < value)
+        if(value > 0)
         {
             isPlaying = true;
-            //StartCoroutine(UIManager.Instance.SliderEffect(_exp, value, MaxExp, UIManager.Instance.PlayerExpSlider,
-            //() => { isPlaying = false; }));
+            StartCoroutine(UIManager.Instance.SliderEffect(_exp, value, MaxExp, UIManager.Instance.PlayerExpSlider,1,
+            () => { isPlaying = false; }));
             while (isPlaying == true)
             {
                 yield return new WaitForSeconds(0.01f);
@@ -126,6 +126,11 @@ public class Player : MonoBehaviour, IGameCharacter
             _exp = value;
         }
         UIManager.Instance.UpdateUI();
+
+        // 키 입력 시 진행되게
+
+        yield return new WaitUntil(() => {return Input.GetKeyDown(KeyCode.Space); });
+        
         GameManager.Instance.NextStep();
     }
 

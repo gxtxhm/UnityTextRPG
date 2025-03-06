@@ -102,12 +102,22 @@ public class GameManager : MonoBehaviour
 
     public void KillMonster()
     {
-        UtilTextManager.Instance.PrintStringByTick(
-            $"{monsters[CurCount].Name}을 물리쳤습니다! " +
-            $"경험치 {monsters[CurCount].Exp}를 획득했습니다.", 0.05f, UIManager.Instance.BattleContext,
+        string s;
+        Monster m = GetCurMonster();
+        if (m is Boss)
+        {
+            s = UtilTextManager.ClearBoss;
+        }
+        else
+        {
+            s = $"{GetCurMonster().Name}을 물리쳤습니다! " +
+             $"경험치 {GetCurMonster().Exp}를 획득했습니다.";
+        }
+        UtilTextManager.Instance.PrintStringByTick(s
+            , 0.05f, UIManager.Instance.BattleContext,
             () => 
             {
-                Player.Exp+=monsters[CurCount].Exp;
+                Player.Exp+=GetCurMonster().Exp;
                 // 경험치 오르는 효과 코루틴으로 
                 
                 //UIManager.Instance.UpdateUI();
@@ -118,7 +128,10 @@ public class GameManager : MonoBehaviour
 
     public Monster GetCurMonster()
     {
-        return monsters[CurCount];
+        if (CurCount < 3)
+            return monsters[CurCount];
+        else
+            return Boss;
     }
 
     public List<Monster> FindHalfHpMonster()
@@ -188,17 +201,15 @@ public class GameManager : MonoBehaviour
     public void OnContinueButton()
     {
         UtilTextManager.Instance.PrintStringByTick(UtilTextManager.DungeonContinue[CurCount], 0.05f,
-            UIManager.Instance.BattleContext, () => { }, true);
-        CurCount++;
-        PlayDungeon(Player);
+            UIManager.Instance.BattleContext, () => {
+                CurCount++;
+                PlayDungeon(Player);
+            }, true);
     }
 
     public void OnExploreButton()
     {
         Explore();
-
-        CurCount++;
-        PlayDungeon(Player);
     }
 
     public void Explore()
@@ -206,7 +217,7 @@ public class GameManager : MonoBehaviour
         //0~99 범위의 난수 생성
         int randomValue = UnityEngine.Random.Range(0, 100);
 
-        if (randomValue < 45)
+        if (randomValue < 75)
         {
             Item randitem = ItemManager.Instance.RandomCreateItem();
             UtilTextManager.Instance.PrintStringByTick("당신은 주변을 탐색하던 중 희미하게 빛나는 물체를 발견했습니다.\r\n" +
@@ -222,40 +233,39 @@ public class GameManager : MonoBehaviour
         }
 
         UtilTextManager.Instance.PrintStringByTick(UtilTextManager.DungeonContinue[CurCount],0.01f,
-            UIManager.Instance.BattleContext, () => { },true);
+            UIManager.Instance.BattleContext, () => {
+                CurCount++;
+                PlayDungeon(Player);
+            },true);
     }
 
     public void PlayDungeon(Player player)
     {
         // 던전 입장
-        //int count = 0;// 몬스터 등장 횟수
-        //int choice;
-        //for (int i = 0; i < GameManager.MonsterCount; i++)
+        if (CurCount < 3)
         {
             UtilTextManager.Instance.PrintStringByTick(UtilTextManager.DungeonAppearedMonster[CurCount], 0.05f,
-                UIManager.Instance.BattleContext, () => { 
+                UIManager.Instance.BattleContext, () =>
+                {
                     UIManager.Instance.UpdateUI();
                     BattleManager.Instance.StartBattle(player, GetCurMonster());
-                },true);
-            Debug.Log(UtilTextManager.DungeonAppearedMonster[CurCount]);
-
-        //// 보스등장
-        //Debug.Log(UtilTextManager.AppearedBoss);
-
-        //ResultBattle resultBattle = BattleManager.Instance.StartBattle(player, GameManager.Instance.Boss);
-
-        //if (resultBattle == ResultBattle.PlayerDie)
-        //{
-        //    Debug.Log(UtilTextManager.PlayerDead); return;
-        //}
-        //else
-        //{
-        //    Debug.Log($"{GameManager.Instance.Boss.Name}을 물리쳤습니다! " +
-        //        $"경험치 {GameManager.Instance.Boss.Exp}를 획득했습니다.\r\n");
-        //    player.GetExp(GameManager.Instance.Boss.Exp);
-
-        //    Debug.Log(UtilTextManager.ClearBoss);
+                }, true);
         }
+        else
+        {
+            // 보스등장
+            UtilTextManager.Instance.PrintStringByTick(UtilTextManager.AppearedBoss,0.05f,UIManager.Instance.BattleContext,
+                () => {
+                    BattleManager.Instance.StartBattle(player, Boss);
+                },true);
+
+            //Debug.Log($"{GameManager.Instance.Boss.Name}을 물리쳤습니다! " +
+            //    $"경험치 {GameManager.Instance.Boss.Exp}를 획득했습니다.\r\n");
+            //player.GetExp(GameManager.Instance.Boss.Exp);
+
+            //Debug.Log(UtilTextManager.ClearBoss);
+            
+         }
     }
 
     void GameOver()
