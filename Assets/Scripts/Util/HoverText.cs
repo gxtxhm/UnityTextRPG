@@ -27,16 +27,15 @@ public class HoverText : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         text = panel.GetComponentInChildren<TextMeshProUGUI>();
     }
 
-    public void SetPanel(IInfoProvider info)
+    public void SetPanel(IInfoProvider info,bool ForcedAssigned=false)
     {
         if(_infoProvider ==null) _infoProvider = info;
+        if (ForcedAssigned) _infoProvider = info;
         text.text = info.TranslateInfoToString();
 
         
 
         panel.SetActive(false);
-
-
     }
 
     public void OnPointerEnter(PointerEventData eventData)

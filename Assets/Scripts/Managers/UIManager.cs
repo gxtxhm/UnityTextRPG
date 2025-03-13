@@ -182,7 +182,7 @@ public class UIManager : MonoBehaviour
         if(GameManager.Instance.IsLoadData==false)
         {
             UtilTextManager.Instance.PrintStringByTick(UtilTextManager.IntroMainScene, 0.05f, IntroText,
-            () => { IntroInputField.SetActive(true); });
+            () => { IntroInputField.SetActive(true); GameManager.Instance.IsLoadData = true; });
         }
         else
         {

@@ -50,7 +50,7 @@ internal class BattleManager : MonoBehaviour
         else
         {
             UtilTextManager.Instance.PrintStringByTick(UtilTextManager.ExitDungeon,0.005f,
-                UIManager.Instance.BattleContext, () => { UIManager.Instance.ActiveChoiceButtons(); });
+                UIManager.Instance.BattleContext, () => { GameManager.Instance.MoveTown(); });
             //return ResultBattle.RetreatPlayer;
         }
     }

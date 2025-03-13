@@ -225,6 +225,7 @@ public class GameManager : MonoBehaviour
         UtilTextManager.Instance.PrintStringByTick(UtilTextManager.DungeonContinue[CurCount], 0.05f,
             UIManager.Instance.BattleContext, () => {
                 CurCount++;
+                UIManager.Instance.EnemyNameText.GetComponent<HoverText>().SetPanel(GetCurMonster(),true);
                 PlayDungeon(Player);
             }, true);
     }
@@ -257,6 +258,7 @@ public class GameManager : MonoBehaviour
         UtilTextManager.Instance.PrintStringByTick(UtilTextManager.DungeonContinue[CurCount],0.01f,
             UIManager.Instance.BattleContext, () => {
                 CurCount++;
+                UIManager.Instance.EnemyNameText.GetComponent<HoverText>().SetPanel(GetCurMonster(),true);
                 PlayDungeon(Player);
             },true);
     }
@@ -349,6 +351,7 @@ public class GameManager : MonoBehaviour
     IEnumerator LoadStartScene()
     {
         //
+        IsLoadData = false;
         AsyncOperation operation = SceneManager.LoadSceneAsync("StartScene");
         while(!operation.isDone)
         {
