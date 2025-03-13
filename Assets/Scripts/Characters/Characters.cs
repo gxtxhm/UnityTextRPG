@@ -17,6 +17,8 @@ public interface IGameCharacter
     //delegate void OnAttack();
     //event Action OnAttackEvent;
     event UnityAction OnAttackEvent;
+
+    
 }
 
 

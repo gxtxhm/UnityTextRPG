@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
 
     public bool IsPlayingCo = false;
 
-    public static int MonsterCount { get; } = 3;
+    public static int MonsterCount { get; } = BattleSetting.MonsterCount;
 
     private GameObject PlayerObj;
     public Player Player;
@@ -39,8 +39,18 @@ public class GameManager : MonoBehaviour
 
     public void Init()
     {
+        // Test
+        //Debug.Log($"{ItemManager.Instance.Inventory.Count}");
+        //for(int i=0;i<5;i++)
+        //{
+        //    Item it = ItemManager.Instance.RandomCreateItem();
+        //    //Debug.Log($"{it.Name} : {it.Type}");
+        //}
+
+
+        // End Test
+
         CurCount = 0;
-        //Player = new Player();
         GameObject playerPrefab = Resources.Load<GameObject>("Prefabs/Player");
         PlayerObj = Instantiate(playerPrefab);
         Player = PlayerObj.GetComponent<Player>();
@@ -63,11 +73,19 @@ public class GameManager : MonoBehaviour
         Player.OnAttackEvent += BroadcastPlayerAttack;
 
         //ItemManager.Instance.LoadItemsFromJson();
-        ItemManager.Instance.OnUsedItem += BroadcastUseItemLog;
 
-        //Player.PrintPropertyValueByReflection(Player);
+        DontDestroyOnLoad(gameObject);
+        DontDestroyOnLoad(Player);
+        DontDestroyOnLoad(PlayerObj);
+        foreach (Monster monster in monsters)
+            DontDestroyOnLoad(monster);
+        DontDestroyOnLoad(Boss);
 
-        
+    }
+
+    void InitFromJsonFile()
+    {
+        SaveLoadManager.Instance.LoadDefaultDataFromJson();
     }
 
     private void Awake()
@@ -76,17 +94,17 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             Init();
-            DontDestroyOnLoad(gameObject);
-            DontDestroyOnLoad(Player);
-            DontDestroyOnLoad(PlayerObj);
-            foreach(Monster monster in monsters)
-                DontDestroyOnLoad (monster);
-            DontDestroyOnLoad(Boss);
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        InitFromJsonFile();
+        UIManager.Instance.LoadFilePanelInit();
     }
 
     public void Update()
@@ -100,35 +118,40 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void LoadDungeonData(ProgressGameData data)
+    {
+        CurCount = data.currentFloor;
+    }
+
     public void KillMonster()
     {
         string s;
         Monster m = GetCurMonster();
+
+        Action a;
+
         if (m is Boss)
         {
             s = UtilTextManager.ClearBoss;
+            a = () => { UIManager.Instance.EndGameUI(); };
         }
         else
         {
             s = $"{GetCurMonster().Name}을 물리쳤습니다! " +
              $"경험치 {GetCurMonster().Exp}를 획득했습니다.";
+            a = () =>
+            {
+                Player.Exp += GetCurMonster().Exp;
+            };
         }
         UtilTextManager.Instance.PrintStringByTick(s
-            , 0.05f, UIManager.Instance.BattleContext,
-            () => 
-            {
-                Player.Exp+=GetCurMonster().Exp;
-                // 경험치 오르는 효과 코루틴으로 
-                
-                //UIManager.Instance.UpdateUI();
-                //NextStep();
-            });
+            , 0.05f, UIManager.Instance.BattleContext,a);
 
     }
 
     public Monster GetCurMonster()
     {
-        if (CurCount < 3)
+        if (CurCount < BattleSetting.MonsterCount)
             return monsters[CurCount];
         else
             return Boss;
@@ -149,27 +172,23 @@ public class GameManager : MonoBehaviour
 
     public void PrintPlayerInfo()
     {
-        Debug.Log("캐릭터 상태창입니다.");
-        //Player.PrintInfo();
+        //Debug.Log("캐릭터 상태창입니다.");
         GameObject item = UIManager.Instance.CreatePlayerInfoPanel();
         if (item == null) return;
-        ItemManager.Instance.PrintInventory();
     }
 
     public void MoveTown()
     {
-        Debug.Log(UtilTextManager.EnterTown);
+        //Debug.Log(UtilTextManager.EnterTown);
         StartCoroutine(LoadMainScene());
     }
 
     // 로드 배틀씬 후에 배틀씬에서의 동작완성하기
     public void MoveDungeon()
     {
-        Debug.Log(UtilTextManager.EnterDungeon);
+        //Debug.Log(UtilTextManager.EnterDungeon);
 
         StartCoroutine(LoadBattleScene());
-
-        //PlayDungeon(Player);
     }
 
     IEnumerator LoadBattleScene()
@@ -187,7 +206,7 @@ public class GameManager : MonoBehaviour
     {
         UIManager.Instance.CharacterInfoObject.SetActive(false);
 
-        Debug.Log(UtilTextManager.NextStepChoice);
+        //Debug.Log(UtilTextManager.NextStepChoice);
         UtilTextManager.Instance.PrintStringByTick(UtilTextManager.NextStepChoice, 0.05f,
             UIManager.Instance.BattleContext, () => { UIManager.Instance.CreateNextChoicePanel(); }, true);
     }
@@ -242,7 +261,7 @@ public class GameManager : MonoBehaviour
     public void PlayDungeon(Player player)
     {
         // 던전 입장
-        if (CurCount < 3)
+        if (CurCount < BattleSetting.MonsterCount)
         {
             UtilTextManager.Instance.PrintStringByTick(UtilTextManager.DungeonAppearedMonster[CurCount], 0.05f,
                 UIManager.Instance.BattleContext, () =>
@@ -256,15 +275,9 @@ public class GameManager : MonoBehaviour
             // 보스등장
             UtilTextManager.Instance.PrintStringByTick(UtilTextManager.AppearedBoss,0.05f,UIManager.Instance.BattleContext,
                 () => {
+                    UIManager.Instance.UpdateUI();
                     BattleManager.Instance.StartBattle(player, Boss);
                 },true);
-
-            //Debug.Log($"{GameManager.Instance.Boss.Name}을 물리쳤습니다! " +
-            //    $"경험치 {GameManager.Instance.Boss.Exp}를 획득했습니다.\r\n");
-            //player.GetExp(GameManager.Instance.Boss.Exp);
-
-            //Debug.Log(UtilTextManager.ClearBoss);
-            
          }
     }
 
@@ -293,7 +306,6 @@ public class GameManager : MonoBehaviour
     // UI 버튼관련
     public void OnStartButton()
     {
-        Debug.Log("StartBtn");
         MoveTown();
     }
     
@@ -311,8 +323,19 @@ public class GameManager : MonoBehaviour
 
     public void OnEndButton()
     {
-        Debug.Log("EndBtn");
         Application.Quit();
+    }
+
+    public void OnLoadButton()
+    {
+        UIManager.Instance.LoadFilePanel.SetActive(true);
+    }
+
+    // Rule : 모든 Cancel버튼은 그 패널의 바로 아래에 자식으로 둔다.
+    public void OnCancelButton()
+    {
+        GameObject clickedButton = EventSystem.current.currentSelectedGameObject;
+        clickedButton.transform.parent.gameObject.SetActive(false);
     }
 
     public void OnMainMenuButton()
@@ -322,7 +345,8 @@ public class GameManager : MonoBehaviour
 
     IEnumerator LoadStartScene()
     {
-        AsyncOperation operation = SceneManager.LoadSceneAsync("StartScene");
+        //
+        AsyncOperation operation = SceneManager.LoadSceneAsync("StartScene",LoadSceneMode.Additive);
         while(!operation.isDone)
         {
             yield return null;
@@ -332,7 +356,7 @@ public class GameManager : MonoBehaviour
 
     public void OnEndEditIntroInputField(string s)
     {
-        Debug.Log(s);
+        //Debug.Log(s);
         Player.Name = s;
     }
 }

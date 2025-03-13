@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Monster : MonoBehaviour, IGameCharacter
+public class Monster : MonoBehaviour, IGameCharacter, IInfoProvider
 {
     static int CountId = 1;
     [SerializeField]
@@ -51,6 +51,18 @@ public class Monster : MonoBehaviour, IGameCharacter
         OnDeadEvent += Dead;
         OnAttackEvent += PlayAttack;
     }
+
+    public string TranslateInfoToString()
+    {
+        string s = "";
+        s += $"이름 : {Name}\n";
+        s += $"레벨 : {Level}\n";
+        s += $"Hp : {Hp}/{MaxHp}\n";
+        s += $"공격력 : {AttackPower}";
+
+        return s;
+    }
+
     public void PlayAttack()
     {
         Debug.Log($"{Name}몬스터가 공격을 시도합니다.");
@@ -73,7 +85,8 @@ public class Monster : MonoBehaviour, IGameCharacter
         Debug.Log($"{Name}에게 데미지{damage}를 입혔습니다. {Name}의 체력 : {Hp}");
 
         int targetValue = (Hp - damage < 0) ? 0 : Hp - damage;
-        StartCoroutine(UIManager.Instance.SliderEffect(Hp, Hp - damage, MaxHp, UIManager.Instance.EnemySlider, 1, 
+        
+        StartCoroutine(UIManager.Instance.SliderEffect(Hp, targetValue, MaxHp, UIManager.Instance.EnemySlider, 1, 
             () => { Hp -= damage; UIManager.Instance.UpdateUI(); }));
         
     }

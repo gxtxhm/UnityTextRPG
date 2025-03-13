@@ -6,6 +6,17 @@ using TMPro;
 using UnityEngine.UI;
 using System.Collections;
 using System.Xml.Schema;
+using static Unity.VisualScripting.Metadata;
+using Unity.VisualScripting;
+using static UnityEditor.Progress;
+
+public enum PotionType
+{
+    HpPotion = 0,
+    AttackPotion = 4,
+    ShieldPotion = 5,
+    RandomPotion = 7
+};
 
 public class UIManager : MonoBehaviour
 {
@@ -14,11 +25,13 @@ public class UIManager : MonoBehaviour
     // StartScene 관련
     public GameObject startBtn;
     public GameObject endBtn;
+    public GameObject LoadFilePanel;
 
     // MainScene 관련
     public GameObject playerInfoBtn;
     public GameObject EnterDungeonBtn;
     public GameObject MainMenuBtn;
+    public GameObject SaveBtn;
 
     public GameObject IntroPanel;
     public TextMeshProUGUI IntroText;
@@ -43,13 +56,45 @@ public class UIManager : MonoBehaviour
 
     public GameObject NextChoicePanel;
 
+    public GameObject EndGamePanelPrefab;
+    public GameObject EndGamePanel;
+
+    GameObject _inventory;
+    // Inventory 관련
+    public GameObject Inventory { 
+        get { return _inventory; }
+        private set { _inventory = value; }
+    }
+    public GameObject ItemButton;
+    GameObject _buttonPanel;
+    GameObject buttonPrefab;
+    Sprite[] potionSprites;
+
+    public bool IsUsedSliderEffect = false;
+
     public void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            buttonPrefab = Resources.Load<GameObject>("Prefabs/ItemButton");
+            EndGamePanelPrefab = Resources.Load<GameObject>("Prefabs/EndGamePanel");
         }
+    }
+    private void Start()
+    {
+        LoadFilePanel = GameObject.Find("LoadFilePanel");
+
+        
+    }
+
+    public void LoadFilePanelInit()
+    {
+        Button[] buttons = LoadFilePanel.GetComponentsInChildren<Button>();
+        SaveLoadManager.Instance.LoadSaveFiles(buttons);
+
+        LoadFilePanel.SetActive(false);
     }
 
     public void SetStartSceneUI()
@@ -65,6 +110,10 @@ public class UIManager : MonoBehaviour
         startBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.OnStartButton);
         endBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.OnEndButton);
 
+        //LoadFilePanelInit();
+        //LoadFilePanel.SetActive(false);
+
+        AdjustLineSpacing();
     }
 
     public void SetMainSceneUI()
@@ -72,6 +121,8 @@ public class UIManager : MonoBehaviour
         playerInfoBtn = GameObject.Find("PlayerInfoBtn");
         EnterDungeonBtn = GameObject.Find("EnterDungeonBtn");
         MainMenuBtn = GameObject.Find("MainMenuBtn");
+        SaveBtn = GameObject.Find("SaveBtn");
+
         IntroPanel = GameObject.Find("IntroPanel");
         IntroText = GameObject.Find("IntroText").GetComponent<TextMeshProUGUI>();
         IntroInputField = GameObject.Find("InputField");
@@ -82,7 +133,7 @@ public class UIManager : MonoBehaviour
         if (playerInfoBtn == null || EnterDungeonBtn == null ||
             MainMenuBtn == null || IntroPanel == null ||
             IntroText == null || IntroInputField == null ||
-            LastText == null)
+            LastText == null || SaveBtn == null)
         {
             Debug.Log("Error Find Buttons in SetMainSceneUI"); return;
         }
@@ -90,11 +141,14 @@ public class UIManager : MonoBehaviour
         playerInfoBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.PrintPlayerInfo);
         EnterDungeonBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.MoveDungeon);
         MainMenuBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.OnMainMenuButton);
+        SaveBtn.GetComponent<Button>().onClick.AddListener(SaveLoadManager.Instance.SaveGame);
         IntroInputField.GetComponent<TMP_InputField>().onEndEdit.AddListener(CompleteInputName);
 
         //IntroInputField.SetActive(false);
         UtilTextManager.Instance.PrintStringByTick(UtilTextManager.IntroMainScene, 0.05f, IntroText,
             () => { IntroInputField.SetActive(true); });
+
+        AdjustLineSpacing();
     }
 
     void CompleteInputName(string s)
@@ -109,10 +163,15 @@ public class UIManager : MonoBehaviour
 
     public void SetBattleSceneUI()
     {
+        potionSprites = Resources.LoadAll<Sprite>("Image/Portions");
+
         GameObject buttonsPanel = GameObject.Find("ButtonsPanel");
         BattleContext = GameObject.Find("BattleContext").GetComponent<TextMeshProUGUI>();
         PlayerNameText = GameObject.Find("PlayerText").GetComponent<TextMeshProUGUI>();
+        PlayerNameText.GetComponent<HoverText>().SetPanel(GameManager.Instance.Player);
+
         EnemyNameText = GameObject.Find("EnemyText").GetComponent<TextMeshProUGUI>();
+        EnemyNameText.GetComponent<HoverText>().SetPanel(GameManager.Instance.GetCurMonster());
 
         CharacterInfoObject = GameObject.Find("CharacterInfo");
         PlayerSlider = GameObject.Find("PlayerSlider");
@@ -148,10 +207,16 @@ public class UIManager : MonoBehaviour
 
         buttons[0].onClick.AddListener(() => { choicebox.SetActive(false); GameManager.Instance.PlayDungeon(GameManager.Instance.Player); });
         buttons[1].onClick.AddListener(()=> { choicebox.SetActive(false); GameManager.Instance.MoveTown();  });
-        choicebox.transform.SetParent(GameObject.Find("Canvas").transform, false);
+        choicebox.transform.SetParent(GameObject.Find("Panels").transform, false);
 
         UtilTextManager.Instance.PrintStringByTick(UtilTextManager.EnterDungeon, 0.05f, BattleContext, () => { choicebox.SetActive(true); });
         UpdateUI();
+
+
+        if (_inventory == null) _inventory = CreateInventory();
+        ItemManager.Instance.OnUsedItem += CreateInventoryPanel;
+        
+        AdjustLineSpacing();
     }
 
     public GameObject CreateItemUI(string address)
@@ -183,6 +248,7 @@ public class UIManager : MonoBehaviour
         EnemySlider.GetComponentInChildren<TextMeshProUGUI>().text = monster.Hp.ToString();
 
 
+        EnemyNameText.GetComponent<HoverText>().SetPanel(GameManager.Instance.GetCurMonster());
 
         CharacterInfoObject.SetActive(true);
     }
@@ -212,6 +278,7 @@ public class UIManager : MonoBehaviour
     // slider 와 text를 동시에 바꿈
     public IEnumerator SliderEffect(int start, int end, int maxValue, GameObject slider,float duration = 1, Action action = null)
     {
+        IsUsedSliderEffect = true;
         Slider s = slider.GetComponentInChildren<Slider>();
         TextMeshProUGUI t = slider.GetComponentInChildren<TextMeshProUGUI>();
 
@@ -222,6 +289,9 @@ public class UIManager : MonoBehaviour
 
         float startValue = s.value;
         float elapsedTime = 0f;
+
+        end = (end < maxValue) ? end : maxValue;
+        Debug.Log($"In SliderEffect End : {end}");
 
         while (elapsedTime < duration)
         {
@@ -234,6 +304,7 @@ public class UIManager : MonoBehaviour
         }
         Canvas.ForceUpdateCanvases();
         action?.Invoke();
+        IsUsedSliderEffect = false;
     }
 
     public GameObject CreateNextChoicePanel()
@@ -241,7 +312,7 @@ public class UIManager : MonoBehaviour
         if (NextChoicePanel != null) return null;
         GameObject panelPrefab = Resources.Load<GameObject>("Prefabs/NextChoiceBox");
         GameObject panel = Instantiate(panelPrefab);
-        panel.transform.SetParent(GameObject.Find("Canvas").transform, false);
+        panel.transform.SetParent(GameObject.Find("Panels").transform, false);
 
         NextChoicePanel = panel;
 
@@ -256,19 +327,14 @@ public class UIManager : MonoBehaviour
 
     public GameObject CreatePlayerInfoPanel()
     {
-        if (PlayerInfoPanel != null) return null;
+        if (PlayerInfoPanel != null) return PlayerInfoPanel;
         GameObject playerInfoPanelPrefab = Resources.Load<GameObject>("Prefabs/PlayerInfoPanel");
         GameObject panel = Instantiate(playerInfoPanelPrefab);
-        panel.transform.SetParent(GameObject.Find("Canvas").transform,false);
+        panel.transform.SetParent(GameObject.Find("Panels").transform,false);
         Player p = GameManager.Instance.Player;
         panel.GetComponentInChildren<Button>().onClick.AddListener(() => { Destroy(panel); });
         TextMeshProUGUI text = panel.GetComponentInChildren<TextMeshProUGUI>();
-        text.text = "이름 : " + p.Name+"\n";
-        text.text += "레벨 : " + p.Level + "\n";
-        text.text += $"경험치 : {p.Exp}/{p.MaxExp}\n";
-        text.text += $"체력 : {p.Hp}/{p.MaxHp}\n";
-        text.text += "공격력 : " + p.AttackPower + "\n";
-        text.text += "방어력(비율) : " + p.DefenseRate + "\n";
+        text.text += p.TranslateInfoToString();
         // 플레이어정보출력에서 인벤토리 목록도 출력하기
         text.text += "\n 인벤토리 목록\n";
         foreach(var item in ItemManager.Instance.Inventory)
@@ -301,5 +367,132 @@ public class UIManager : MonoBehaviour
         Color32 c = AttackBtn.transform.parent.GetComponent<Image>().color;
         c.a = 10;
         AttackBtn.transform.parent.GetComponent<Image>().color = c;
+    }
+
+    GameObject CreateInventory()
+    {
+        GameObject Prefab = Resources.Load<GameObject>("Prefabs/InventoryPanel");
+        Inventory = Instantiate(Prefab);
+        Inventory.SetActive(true);
+        Inventory.transform.SetParent(GameObject.Find("Panels").transform, false);
+
+        Button closeBtn = Inventory.GetComponentInChildren<Button>();
+        if(closeBtn == null)
+        {
+            Debug.Log("CreateInventory CloseButton Not Found Error!");return null;
+        }
+
+        closeBtn.onClick.AddListener(CloseInventory);
+
+
+        // 인벤토리 목록 만들기
+        //GameObject go = CreateInventoryPanel();
+        if (_buttonPanel == null)
+            _buttonPanel = GameObject.Find("ButtonPanel");
+        Inventory.SetActive(false);
+        return Inventory;
+    }
+
+    // 나중에 버튼 생성을 더 효율적으로 -> 미리 만들어놓고 사용하는 오브젝트 풀링기법 적용하기
+    public void CreateInventoryPanel(Item item)
+    {
+        // Find 함수는 활성화일때만 찾을수있음
+
+        StartCoroutine(updateInvenPanel());
+        //LayoutRebuilder.ForceRebuildLayoutImmediate(Inventory.GetComponent<RectTransform>());
+        Debug.Log("UpdateInventory");
+        //return ButtonPanel;
+    }
+
+    public Sprite GetSpriteByItemKey(string type)
+    {
+        if (Enum.TryParse(type, out PotionType potionType))
+        {
+            return potionSprites[(int)potionType]; // 변환 성공 시 해당 인덱스 사용
+                                                              //Debug.Log($"Create Button : {item.Key} - {(int)potionType}");
+        }
+        else
+        {
+            Debug.LogWarning($"알 수 없는 포션 타입: {type}");
+            return null;
+        }
+    }
+
+    IEnumerator updateInvenPanel()
+    {
+        Button[] children = _buttonPanel.GetComponentsInChildren<Button>();
+        if (children.Length > 0)
+        {
+            foreach (var item in children) Destroy(item.gameObject);
+        }
+
+        yield return null;
+
+        
+        foreach (var item in ItemManager.Instance.Inventory)
+        {
+            GameObject button = Instantiate(buttonPrefab);
+            button.SetActive(true);
+            button.transform.SetParent(_buttonPanel.transform, false);
+
+            // 우선 버튼 프리팹 특성 상 두개만 존재하기에 자식에 인덱스로 이렇게 접근함.
+            Image[] image = button.GetComponentsInChildren<Image>();
+
+            Sprite sprite = GetSpriteByItemKey(item.Key);
+            image[1].sprite = sprite;
+
+            button.GetComponentInChildren<TextMeshProUGUI>().text = $"{item.Value[0].Name} : {item.Value.Count}개";
+            button.GetComponent<Button>().onClick.AddListener(
+                () => { ItemManager.Instance.UsedItem(item.Key, GameManager.Instance.Player); });
+
+            button.GetComponent<HoverText>().SetPanel(item.Value[0]);
+        }
+        yield return null;
+        Inventory.SetActive(true);
+        //LayoutRebuilder.ForceRebuildLayoutImmediate(Inventory.GetComponent<RectTransform>());
+        //LayoutRebuilder.ForceRebuildLayoutImmediate(_buttonPanel.GetComponent<RectTransform>());
+    }
+
+    public void OpenInventory()
+    {
+        // 이 창만 클릭되게
+        // 만약 여러창이 겹쳐서 쌓이면 오류 발생가능성 있을듯
+        
+        Debug.Log("OpenInventory");
+        
+        GameObject.Find("Panels").GetComponent<CanvasGroup>().blocksRaycasts = false;
+        Inventory.GetComponent<CanvasGroup>().blocksRaycasts = true;
+        Inventory.GetComponent<CanvasGroup>().ignoreParentGroups = true;
+        Inventory.GetComponent<RectTransform>().anchoredPosition = new Vector2(800,0);
+        // TODO : null 고쳐야함
+        CreateInventoryPanel(null);
+       
+    }
+
+    public void CloseInventory()
+    {
+        Debug.Log("CLoseInventory");
+        GameObject.Find("Panels").GetComponent<CanvasGroup>().blocksRaycasts = true;
+        //Inventory.GetComponent<CanvasGroup>().blocksRaycasts = false;
+        Inventory.SetActive(false);
+    }
+
+    void AdjustLineSpacing()
+    {
+        TextMeshProUGUI[] items = FindObjectsOfType<TextMeshProUGUI>();
+        foreach(var item in items)
+        {
+            item.lineSpacing = UISetting.LineSpace;
+        }
+    }
+
+    public void EndGameUI()
+    {
+        EndGamePanel = Instantiate(EndGamePanelPrefab);
+
+        GameObject go = GameObject.Find("Panels");
+        EndGamePanel.transform.SetParent(go.transform,false);
+
+        EndGamePanel.GetComponentInChildren<Button>().onClick.AddListener(GameManager.Instance.OnMainMenuButton);
     }
 }

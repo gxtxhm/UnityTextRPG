@@ -1,0 +1,19 @@
+﻿{
+  "player": {
+    "name": "용사",
+    "level": 5,
+    "exp": 120,
+    "maxExp": 200,
+    "hp": 80,
+    "maxHp": 100,
+    "attackPower": 15
+  },
+  "inventory": {
+    "HpPotion": 3,
+    "AttackPotion": 2
+  },
+  "dungeonProgress": {
+    "currentFloor": 3,
+    "bossDefeated": false
+  }
+}

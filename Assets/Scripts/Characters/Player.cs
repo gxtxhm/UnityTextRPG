@@ -11,8 +11,9 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using Newtonsoft.Json.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
-public class Player : MonoBehaviour, IGameCharacter
+public class Player : MonoBehaviour, IGameCharacter, IInfoProvider
 {
     public int MaxHp { get; set; } = 100;
     int _hp;
@@ -55,6 +56,19 @@ public class Player : MonoBehaviour, IGameCharacter
         this.Name = Name;
     }
 
+    public string TranslateInfoToString()
+    {
+        string s="";
+        s += "이름 : " + Name + "\n";
+        s += "레벨 : " + Level + "\n";
+        s += $"경험치 : {Exp}/{MaxExp}\n";
+        s += $"체력 : {Hp}/{MaxHp}\n";
+        s += "공격력 : " + AttackPower + "\n";
+        s += "방어력(비율) : " + DefenseRate + "\n";
+
+        return s;
+    }
+
     public IEnumerator ExpEffect(int exp, GameObject slider, Action action = null)
     {
         while(Input.GetKeyDown(KeyCode.Space)==false)
@@ -89,6 +103,13 @@ public class Player : MonoBehaviour, IGameCharacter
         StartCoroutine(UIManager.Instance.SliderEffect(Hp, Hp - damage, MaxHp, UIManager.Instance.PlayerSlider, 1, 
             () => { Hp -= (int)(damage * DefenseRate); UIManager.Instance.UpdateUI(); }));
         
+    }
+
+    public void HealHp(int heal)
+    {
+        StartCoroutine(UIManager.Instance.SliderEffect(Hp, Hp + heal, MaxHp,
+            UIManager.Instance.PlayerSlider, 1,
+            () => { Hp += heal; UIManager.Instance.UpdateUI(); }));
     }
 
     IEnumerator PlayLevelUp(int value)
@@ -143,4 +164,18 @@ public class Player : MonoBehaviour, IGameCharacter
     {
        
     }
+
+    public void LoadPlayerData(PlayerData data)
+    {
+        this.Name = data.name;
+        this.Level = data.level;
+        _exp = data.exp;
+        this.MaxExp = data.maxExp;
+        this.Hp = data.hp;
+        this.MaxHp = data.maxHp;
+        this.AttackPower = data.attackPower;
+
+        Debug.Log("플레이어 데이터 로드 완료");
+    }
+
 }

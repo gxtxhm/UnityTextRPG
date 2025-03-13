@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 internal class BattleManager : MonoBehaviour
@@ -56,9 +57,7 @@ internal class BattleManager : MonoBehaviour
 
     public void OnInventoryButton()
     {
-        //UIManager.Instance.DeactiveChoiceButtons();
         ItemManager.Instance.PrintInventory();
-        //UIManager.Instance.ActiveChoiceButtons();
     }
 
     public void OnAttackButton()
@@ -78,12 +77,15 @@ internal class BattleManager : MonoBehaviour
     {
         player.Attack(monster);
 
-        yield return new WaitUntil(()=>UtilTextManager.Instance.IsUsed == false);
+        yield return new WaitUntil(()=>UtilTextManager.Instance.IsUsed == false && UIManager.Instance.IsUsedSliderEffect == false);
+
+        if (monster.Hp <= 0) { ItemManager.Instance.UpdateItemManager(); UIManager.Instance.ActiveChoiceButtons(); yield break; }
 
         monster.Attack(player);
 
-        yield return new WaitUntil(() => UtilTextManager.Instance.IsUsed == false);
+        yield return new WaitUntil(() => UtilTextManager.Instance.IsUsed == false && UIManager.Instance.IsUsedSliderEffect == false);
 
+        ItemManager.Instance.UpdateItemManager();
         UIManager.Instance.ActiveChoiceButtons();
     }
 }
