@@ -1,0 +1,132 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1906098511462238417
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7733602544989157596}
+  - component: {fileID: 6108702494824443844}
+  - component: {fileID: 3718783663412505854}
+  - component: {fileID: 1251825479963578052}
+  - component: {fileID: 6036279818704512921}
+  - component: {fileID: 2057568517235846097}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7733602544989157596
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1906098511462238417}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6108702494824443844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1906098511462238417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7668b4687117b4c48a7e007ebeb6f0c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsSkip: 0
+  IsPlayingCo: 0
+  Player: {fileID: 0}
+  monsters: []
+  CurCount: 0
+--- !u!114 &3718783663412505854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1906098511462238417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b86aa70bc26b8149986364155e067b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsUsed: 0
+--- !u!114 &1251825479963578052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1906098511462238417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5d703424c534ce45a88999f80e8f41f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startBtn: {fileID: 0}
+  endBtn: {fileID: 0}
+  LoadFilePanel: {fileID: 0}
+  playerInfoBtn: {fileID: 0}
+  EnterDungeonBtn: {fileID: 0}
+  MainMenuBtn: {fileID: 0}
+  SaveBtn: {fileID: 0}
+  IntroPanel: {fileID: 0}
+  IntroText: {fileID: 0}
+  IntroInputField: {fileID: 0}
+  LastText: {fileID: 0}
+  PlayerInfoPanel: {fileID: 0}
+  ExitDungeonBtn: {fileID: 0}
+  InventoryBtn: {fileID: 0}
+  AttackBtn: {fileID: 0}
+  BattleContext: {fileID: 0}
+  CharacterInfoObject: {fileID: 0}
+  PlayerNameText: {fileID: 0}
+  EnemyNameText: {fileID: 0}
+  PlayerSlider: {fileID: 0}
+  EnemySlider: {fileID: 0}
+  PlayerExpSlider: {fileID: 0}
+  LevelText: {fileID: 0}
+  NextChoicePanel: {fileID: 0}
+  EndGamePanelPrefab: {fileID: 0}
+  EndGamePanel: {fileID: 0}
+  ItemButton: {fileID: 0}
+  IsUsedSliderEffect: 0
+--- !u!114 &6036279818704512921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1906098511462238417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 234b4575ccd3f5a4e8d9186c0816b0c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2057568517235846097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1906098511462238417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a3a2dc2469063742954dfdead4f5ff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

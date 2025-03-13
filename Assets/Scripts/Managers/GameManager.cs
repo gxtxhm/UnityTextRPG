@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
+    public bool IsLoadData = false;
+
     public bool IsSkip = false;
 
     public bool IsPlayingCo = false;
@@ -81,6 +83,7 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(monster);
         DontDestroyOnLoad(Boss);
 
+        StartCoroutine(LoadStartScene());
     }
 
     void InitFromJsonFile()
@@ -104,7 +107,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         InitFromJsonFile();
-        UIManager.Instance.LoadFilePanelInit();
+        //UIManager.Instance.LoadFilePanelInit();
     }
 
     public void Update()
@@ -346,7 +349,7 @@ public class GameManager : MonoBehaviour
     IEnumerator LoadStartScene()
     {
         //
-        AsyncOperation operation = SceneManager.LoadSceneAsync("StartScene",LoadSceneMode.Additive);
+        AsyncOperation operation = SceneManager.LoadSceneAsync("StartScene");
         while(!operation.isDone)
         {
             yield return null;

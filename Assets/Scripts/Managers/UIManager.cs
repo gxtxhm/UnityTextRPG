@@ -23,40 +23,70 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance { get; private set; }
 
     // StartScene 관련
+    [Header("About StartScene")]
+    [SerializeField]
     public GameObject startBtn;
+    [SerializeField]
     public GameObject endBtn;
+    [SerializeField]
+    public GameObject LoadBtn;
+    [SerializeField]
     public GameObject LoadFilePanel;
 
     // MainScene 관련
+    [Header("About MainScene")]
+    [SerializeField]
     public GameObject playerInfoBtn;
+    [SerializeField]
     public GameObject EnterDungeonBtn;
+    [SerializeField]
     public GameObject MainMenuBtn;
+    [SerializeField]
     public GameObject SaveBtn;
 
+    [Header("About Intro in MainScene")]
+    [SerializeField]
     public GameObject IntroPanel;
+    [SerializeField]
     public TextMeshProUGUI IntroText;
+    [SerializeField]
     public GameObject IntroInputField;
+    [SerializeField]
     public GameObject LastText;
     [SerializeField]
     GameObject PlayerInfoPanel;
 
     // BattleScene 관련
+    [Header("About BattleScene")]
+    [SerializeField]
     public GameObject ExitDungeonBtn;
+    [SerializeField]
     public GameObject InventoryBtn;
+    [SerializeField]
     public GameObject AttackBtn;
 
+    [SerializeField]
     public TextMeshProUGUI BattleContext;
+    [SerializeField]
     public GameObject CharacterInfoObject;
+    [SerializeField]
     public TextMeshProUGUI PlayerNameText;
+    [SerializeField]
     public TextMeshProUGUI EnemyNameText;
+    [SerializeField]
     public GameObject PlayerSlider;
+    [SerializeField]
     public GameObject EnemySlider;
+    [SerializeField]
     public GameObject PlayerExpSlider;
+    [SerializeField]
     public GameObject LevelText;
 
+    [SerializeField]
     public GameObject NextChoicePanel;
-
+    [SerializeField]
     public GameObject EndGamePanelPrefab;
+    [SerializeField]
     public GameObject EndGamePanel;
 
     GameObject _inventory;
@@ -80,12 +110,11 @@ public class UIManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             buttonPrefab = Resources.Load<GameObject>("Prefabs/ItemButton");
             EndGamePanelPrefab = Resources.Load<GameObject>("Prefabs/EndGamePanel");
+            
         }
     }
     private void Start()
     {
-        LoadFilePanel = GameObject.Find("LoadFilePanel");
-
         
     }
 
@@ -94,6 +123,9 @@ public class UIManager : MonoBehaviour
         Button[] buttons = LoadFilePanel.GetComponentsInChildren<Button>();
         SaveLoadManager.Instance.LoadSaveFiles(buttons);
 
+        // 현재 기준으론  cancel버튼임
+        buttons[3].onClick.AddListener(() => { LoadFilePanel.SetActive(false); });
+
         LoadFilePanel.SetActive(false);
     }
 
@@ -101,17 +133,18 @@ public class UIManager : MonoBehaviour
     {
         startBtn = GameObject.Find("StartBtn");
         endBtn = GameObject.Find("EndBtn");
-
-        if (startBtn == null || endBtn == null)
+        LoadBtn = GameObject.Find("LoadBtn");
+        LoadFilePanel = GameObject.Find("LoadFilePanel");
+        if (startBtn == null || endBtn == null || LoadBtn == null || LoadFilePanel == null)
         {
             Debug.Log("Error Find Buttons in SetStartSceneUI"); return;
         }
 
         startBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.OnStartButton);
         endBtn.GetComponent<Button>().onClick.AddListener(GameManager.Instance.OnEndButton);
-
-        //LoadFilePanelInit();
-        //LoadFilePanel.SetActive(false);
+        LoadBtn.GetComponent<Button>().onClick.AddListener(() => LoadFilePanel.SetActive(true));
+        
+        LoadFilePanelInit();
 
         AdjustLineSpacing();
     }
@@ -145,8 +178,17 @@ public class UIManager : MonoBehaviour
         IntroInputField.GetComponent<TMP_InputField>().onEndEdit.AddListener(CompleteInputName);
 
         //IntroInputField.SetActive(false);
-        UtilTextManager.Instance.PrintStringByTick(UtilTextManager.IntroMainScene, 0.05f, IntroText,
+
+        if(GameManager.Instance.IsLoadData==false)
+        {
+            UtilTextManager.Instance.PrintStringByTick(UtilTextManager.IntroMainScene, 0.05f, IntroText,
             () => { IntroInputField.SetActive(true); });
+        }
+        else
+        {
+            IntroPanel.SetActive(false);
+        }
+            
 
         AdjustLineSpacing();
     }

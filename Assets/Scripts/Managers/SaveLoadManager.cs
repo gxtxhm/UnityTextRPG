@@ -14,7 +14,9 @@ public class SaveLoadManager : MonoBehaviour
 {
     public static SaveLoadManager Instance { get; private set; }
 
-    private string saveFolderPath = "C:\\SaveFiles";
+    private string saveFolderPath = "C:\\Users\\ParkSungJin\\Desktop\\SaveFiles";
+
+
 
     private void Awake()
     {
@@ -60,7 +62,7 @@ public class SaveLoadManager : MonoBehaviour
             string fileName = Path.GetFileNameWithoutExtension(fileInfo.Name); // 확장자 제거
             //string lastModified = fileInfo.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss"); // 저장 시간 포맷
 
-            buttons[count].gameObject.GetComponent<TextMeshProUGUI>().text = fileName;
+            buttons[count].gameObject.GetComponentInChildren<TextMeshProUGUI>().text = fileName;
             buttons[count].onClick.AddListener(() => { LoadDataFromJson(fileInfo.FullName); });
             count++;
         }
@@ -115,6 +117,9 @@ public class SaveLoadManager : MonoBehaviour
         GameManager.Instance.Player.LoadPlayerData(saveData.player);
         ItemManager.Instance.LoadInventoryData(saveData.inventory);
         GameManager.Instance.LoadDungeonData(saveData.dungeonProgress);
+
+        GameManager.Instance.MoveTown();
+        GameManager.Instance.IsLoadData = true;
     }
 }
 
