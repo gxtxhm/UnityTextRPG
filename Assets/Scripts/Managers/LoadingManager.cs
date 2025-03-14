@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -11,6 +12,9 @@ public class LoadingManager : MonoBehaviour
     TextMeshProUGUI LoadText;
 
     GameObject gameManagerPrefab;
+
+    [SerializeField]
+    float duration;
 
     bool IsLoading = false;
 
@@ -33,14 +37,14 @@ public class LoadingManager : MonoBehaviour
     {
         if (IsLoading)
         {
-            SceneManager.LoadScene("StartScene");
+            StartCoroutine(FadeInOutCo(LoadingSlider.transform.parent.gameObject, 0.5f, 1, 0, false,
+                () => { SceneManager.LoadScene("StartScene"); }));
         }
     }
 
     IEnumerator LoadSlider()
     {
         float elapsedTime = 0;
-        float duration = 2.0f;
 
         while(elapsedTime < duration)
         {
@@ -73,5 +77,27 @@ public class LoadingManager : MonoBehaviour
             StartCoroutine (actionText(1,0));
         else
             StartCoroutine (actionText(0,1));
+    }
+
+    public IEnumerator FadeInOutCo(GameObject panel, float duration,int startValue,int targetValue,bool b,
+        Action action = null)
+    {
+        CanvasGroup i = panel.GetComponent<CanvasGroup>();
+        if (i == null)
+        {
+            Debug.LogError("Null Error received Object In FadeInOutCo, LoadingManager");
+            yield break;
+        }
+        float time = 0f;
+
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            i.alpha = Mathf.Lerp(startValue, targetValue, time / duration);
+            yield return null;
+        }
+        panel.SetActive(b);
+
+        action?.Invoke();
     }
 }

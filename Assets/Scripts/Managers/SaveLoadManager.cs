@@ -15,10 +15,10 @@ public class SaveLoadManager : MonoBehaviour
     public static SaveLoadManager Instance { get; private set; }
 
     // Desktop
-    //private string saveFolderPath = "C:\\Users\\ParkSungJin\\Desktop\\SaveFiles";
+    private string saveFolderPath = "C:\\Users\\ParkSungJin\\Desktop\\SaveFiles";
     
     // Laptop
-    private string saveFolderPath = "C:\\Users\\PSJ\\Desktop\\SaveFile";
+    //private string saveFolderPath = "C:\\Users\\PSJ\\Desktop\\SaveFile";
 
 
 

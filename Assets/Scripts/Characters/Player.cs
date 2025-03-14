@@ -100,8 +100,10 @@ public class Player : MonoBehaviour, IGameCharacter, IInfoProvider
     public void TakeDamage(int damage)
     {
         Debug.Log($"몬스터에게 데미지{(int)(damage * DefenseRate)}를 입었습니다! 현재체력 : {Hp}");
-        StartCoroutine(UIManager.Instance.SliderEffect(Hp, Hp - damage, MaxHp, UIManager.Instance.PlayerSlider, 1, 
-            () => { Hp -= (int)(damage * DefenseRate); UIManager.Instance.UpdateUI(); }));
+        Debug.Log($"damage : {damage}, DefenseRate : {DefenseRate}");
+        int calDamage = (int)(damage * DefenseRate);
+        StartCoroutine(UIManager.Instance.SliderEffect(Hp, Hp - calDamage, MaxHp, UIManager.Instance.PlayerSlider, 1, 
+            () => { Hp -= calDamage; UIManager.Instance.UpdateUI(); }));
         
     }
 

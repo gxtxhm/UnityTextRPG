@@ -17,7 +17,7 @@
     "Name": "방어력 증가 포션",
     "Description": "사용 시 일정 시간 동안 방어력이 증가합니다.",
     "Effect": 5,
-    "Duration": 5
+    "Duration": 3
   },
   "RandomPotion": {
     "ItemType": "RandomPotion",

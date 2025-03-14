@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 302324256}
   - component: {fileID: 302324255}
   - component: {fileID: 302324257}
+  - component: {fileID: 302324258}
   m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
@@ -209,9 +210,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 302324253}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c19df10b0c431e8479b4d7eed3cb3f93, type: 3}
+  m_Script: {fileID: 11500000, guid: 47023526f0dd7e34193e8ea965fd349b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!225 &302324258
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 302324253}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &900392330
 GameObject:
   m_ObjectHideFlags: 0
@@ -246,8 +259,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 100}
+  m_AnchoredPosition: {x: 0, y: 25}
+  m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &900392332
 MonoBehaviour:
@@ -296,7 +309,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
+  m_fontSize: 44.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -738,7 +751,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 200}
+  m_SizeDelta: {x: 0, y: 100}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1762924893
 MonoBehaviour:
@@ -927,6 +940,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5e0a707b388a124db42c2ca0882861d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  duration: 0.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

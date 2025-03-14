@@ -43,11 +43,11 @@ public class GameManager : MonoBehaviour
     {
         // Test
         //Debug.Log($"{ItemManager.Instance.Inventory.Count}");
-        //for(int i=0;i<5;i++)
-        //{
-        //    Item it = ItemManager.Instance.RandomCreateItem();
-        //    //Debug.Log($"{it.Name} : {it.Type}");
-        //}
+        for (int i = 0; i < 5; i++)
+        {
+            Item it = ItemManager.Instance.RandomCreateItem();
+            //Debug.Log($"{it.Name} : {it.Type}");
+        }
 
 
         // End Test

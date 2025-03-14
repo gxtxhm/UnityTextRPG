@@ -676,11 +676,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 307064367}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f6c8c39fa5faf941a47cb51f17ba91f, type: 3}
+  m_Script: {fileID: 11500000, guid: b3dfb77bf933aa54f913eaccf07d0309, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StartPanelPos: {x: 0, y: 134}
-  EndPanelPos: {x: 0, y: -3}
+  StartPanelPos: {x: 0, y: 0}
+  EndPanelPos: {x: 0, y: 0}
 --- !u!1 &373811765
 GameObject:
   m_ObjectHideFlags: 0

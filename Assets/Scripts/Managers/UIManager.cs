@@ -200,7 +200,7 @@ public class UIManager : MonoBehaviour
         LastText.SetActive(true);
         UtilTextManager.Instance.PrintStringByTick($"{s}님 환영합니다!", 0.1f,
             LastText.GetComponent<TextMeshProUGUI>(),
-            () => { StartCoroutine(FadeOutCo(IntroPanel, 1f)); });
+            () => { StartCoroutine(FadeInOutCo(IntroPanel, 1f,1,0,false)); });
     }
 
     public void SetBattleSceneUI()
@@ -302,19 +302,23 @@ public class UIManager : MonoBehaviour
             rect.verticalNormalizedPosition = 0f;
     }
 
-    public IEnumerator FadeOutCo(GameObject panel, float duration)
+    public IEnumerator FadeInOutCo(GameObject panel, float duration,int startValue,int targetValue,bool b)
     {
         CanvasGroup i = panel.GetComponent<CanvasGroup>();
-        
+        if (i == null)
+        {
+            Debug.LogError("Null Error received Object In FadeInOutCo");
+            yield break;
+        }
         float time = 0f;
 
         while(time < duration)
         {
             time += Time.deltaTime;
-            i.alpha = Mathf.Lerp(1, 0, time / duration);
+            i.alpha = Mathf.Lerp(startValue, targetValue , time / duration);
             yield return null;
         }
-        panel.SetActive(false);
+        panel.SetActive(b);
     }
     
     // slider 와 text를 동시에 바꿈

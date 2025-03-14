@@ -106,7 +106,7 @@ public class ShieldPotion : DurationItem
         Type = config != null ? Enum.Parse<ItemType>(config.ItemType) : ItemType.ShieldPotion; // ✅ JSON에서 `ItemType` 불러오기
         Name = config != null ? config.Name : "방어력증가포션";
         Description = config != null ? config.Description : "3턴 동안 받는 피해가 50% 감소합니다.";
-        BonusShield = config != null ? config.Effect : 0.5f;
+        BonusShield = config != null ? config.Effect/10 : 0.5f;
         Duration = config != null ? config.Duration : _duration;
 
     }
